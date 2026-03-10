@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<!-- ============================================================
+     login.html  —  GeoLearn Sign-In Page
+     ============================================================
+     Purpose:
+       Authenticates a registered user and sets the 7-day session
+       cookie via GeoAuth.login(), then redirects to learn.html.
+
+     Behaviour on load:
+       • If a valid session cookie already exists → immediately
+         redirect to learn.html (no need to log in again)
+       • If URL contains ?registered=1 (sent by register.html) →
+         show a green "Account created!" confirmation banner
+
+     Key functions (in <script> at bottom):
+       • doLogin()  — validates fields, calls GeoAuth.login();
+                      on success shows greeting and redirects
+                      after 1.5 s; on failure shows red alert
+                      and highlights the incorrect fields
+       • Enter key  — triggers doLogin() from anywhere on the page
+
+     Scripts:
+       • auth.js (before page script) — avatar widget + nav updates.
+     ============================================================ -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GeoLearn – Login</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0f1117; --surface: #1a1d27; --card: #21253a;
+      --accent: #4f8ef7; --text: #e8eaf6; --muted: #8b90a8;
+      --red: #f87171; --radius: 14px;
+    }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', Arial, sans-serif; min-height: 100vh; }
+
+    nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 40px; height: 64px;
+      background: rgba(15,17,23,0.9); backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      position: sticky; top: 0; z-index: 100;
+    }
+    .nav-logo { font-size: 1.4rem; font-weight: 800; color: var(--accent); text-decoration: none; letter-spacing: 1px; }
+    .nav-links { display: flex; gap: 6px; flex-wrap: wrap; }
+    .nav-links a { color: var(--muted); text-decoration: none; padding: 8px 14px; border-radius: 8px; font-size: 0.93rem; transition: all 0.2s; }
+    .nav-links a:hover, .nav-links a.active { background: var(--card); color: var(--text); }
+    .nav-links a.cta { background: var(--accent); color: #fff; font-weight: 700; }
+
+    /* LOGIN CARD */
+    .login-wrap {
+      min-height: calc(100vh - 64px); display: flex;
+      align-items: center; justify-content: center; padding: 40px 24px;
+      background: radial-gradient(ellipse 70% 50% at 50% 0%, rgba(79,142,247,0.15) 0%, transparent 70%);
+    }
+    .login-card {
+      background: var(--card); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px; padding: 48px 44px; width: 100%; max-width: 420px;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+    }
+    .login-icon { font-size: 2.4rem; margin-bottom: 16px; }
+    .page-tag { font-size: 0.78rem; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+    .login-card h1 { font-size: 1.7rem; font-weight: 800; margin-bottom: 6px; }
+    .login-sub { color: var(--muted); font-size: 0.9rem; margin-bottom: 32px; line-height: 1.6; }
+    .login-sub a { color: var(--accent); text-decoration: none; }
+    .login-sub a:hover { text-decoration: underline; }
+
+    .field { margin-bottom: 20px; }
+    label { display: block; font-size: 0.83rem; color: var(--muted); margin-bottom: 7px; }
+    input[type="text"], input[type="password"] {
+      width: 100%; background: var(--bg); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px; color: var(--text); padding: 12px 14px;
+      font-size: 0.97rem; outline: none; transition: border-color 0.2s;
+      font-family: 'Segoe UI', Arial, sans-serif;
+    }
+    input:focus { border-color: var(--accent); }
+    input.error { border-color: var(--red); }
+
+    .err-msg { font-size: 0.78rem; color: var(--red); margin-top: 5px; display: none; }
+
+    /* Global error banner */
+    .alert {
+      background: rgba(248,113,113,0.12); border: 1px solid rgba(248,113,113,0.3);
+      border-radius: 10px; padding: 12px 16px; color: var(--red);
+      font-size: 0.88rem; margin-bottom: 20px; display: none;
+    }
+
+    .btn-login {
+      width: 100%; background: var(--accent); color: #fff;
+      border: none; border-radius: 10px;
+      padding: 14px; font-size: 1rem; font-weight: 700;
+      cursor: pointer; transition: opacity 0.2s; margin-top: 4px;
+    }
+    .btn-login:hover { opacity: 0.85; }
+
+    .divider { text-align: center; color: var(--muted); font-size: 0.82rem; margin: 20px 0; }
+    .register-link {
+      display: block; text-align: center; background: var(--surface);
+      border: 1px solid rgba(255,255,255,0.1); border-radius: 10px;
+      padding: 13px; color: var(--text); text-decoration: none;
+      font-size: 0.95rem; font-weight: 600; transition: background 0.2s;
+    }
+    .register-link:hover { background: #2a2f47; }
+
+    /* Success state */
+    .success-msg {
+      text-align: center; padding: 20px 0; display: none;
+    }
+    .success-msg .icon { font-size: 2.5rem; margin-bottom: 12px; }
+    .success-msg h2 { font-size: 1.3rem; font-weight: 800; margin-bottom: 8px; }
+    .success-msg p { color: var(--muted); font-size: 0.9rem; }
+
+    /* Registered banner */
+    .reg-banner {
+      background: rgba(52,211,153,0.12); border: 1px solid rgba(52,211,153,0.3);
+      border-radius: 10px; padding: 12px 16px; color: #34d399;
+      font-size: 0.88rem; margin-bottom: 20px; display: none;
+      display: flex; align-items: center; gap: 10px;
+    }
+
+    footer { text-align: center; padding: 28px; color: var(--muted); font-size: 0.85rem; border-top: 1px solid rgba(255,255,255,0.06); }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="index.html">GeoLearn</a>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="register.html">Register</a>
+    <a href="login.html" class="active">Login</a>
+    <a href="learn.html">Learn</a>
+    <a href="assesment.html">Assessment</a>
+    <a href="feedback.html">Feedback</a>
+    <a href="register.html" class="cta">Get Started</a>
+  </div>
+</nav>
+
+<div class="login-wrap">
+  <div class="login-card">
+    <div class="login-icon">🔐</div>
+    <div class="page-tag">Welcome Back</div>
+    <h1>Sign In</h1>
+    <p class="login-sub">Don't have an account? <a href="register.html">Register free →</a></p>
+
+    <!-- Login form -->
+    <div id="login-form">
+      <div class="reg-banner" id="reg-banner">
+        <span style="font-size:1.1rem">✅</span>
+        <span>Account created! Please sign in to continue.</span>
+      </div>
+      <div class="alert" id="login-alert"></div>
+
+      <div class="field">
+        <label for="l-username">Username</label>
+        <input type="text" id="l-username" placeholder="Your username" autocomplete="username" />
+        <div class="err-msg" id="err-lusername">Please enter your username.</div>
+      </div>
+      <div class="field">
+        <label for="l-password">Password</label>
+        <input type="password" id="l-password" placeholder="Your password" autocomplete="current-password" />
+        <div class="err-msg" id="err-lpassword">Please enter your password.</div>
+      </div>
+
+      <button class="btn-login" onclick="doLogin()">Sign In →</button>
+
+      <div class="divider">— or —</div>
+      <a href="register.html" class="register-link">Create a Free Account</a>
+    </div>
+
+    <!-- Success (shown briefly before redirect) -->
+    <div class="success-msg" id="login-success">
+      <div class="icon">✅</div>
+      <h2 id="success-greeting">Welcome back!</h2>
+      <p>Redirecting you to the lessons…</p>
+    </div>
+  </div>
+</div>
+
+<footer>&copy; 2026 GeoLearn &nbsp;|&nbsp; <a href="index.html" style="color:var(--accent);text-decoration:none">Home</a></footer>
+
+<script src="auth.js"></script>
+<script>
+  /*
+   * login.html — page script
+   *
+   * On load:
+   *   • If the user already has a valid session cookie, skip the login
+   *     form entirely and redirect straight to learn.html
+   *   • If the URL contains ?registered=1 (set by register.html on success)
+   *     show a green confirmation banner above the form
+   *
+   * doLogin():
+   *   • Validates that both fields are filled
+   *   • Calls GeoAuth.login() which checks localStorage for a matching
+   *     username + password and sets the session cookie on success
+   *   • On failure: shows a red alert banner and red field borders
+   *   • On success: swaps the form for a success message, then
+   *     redirects to learn.html after 1.5 seconds
+   */
+
+  // Redirect if already logged in; show registered banner if ?registered=1
+  document.addEventListener('DOMContentLoaded', function () {
+    if (GeoAuth.isLoggedIn()) {
+      window.location.href = 'learn.html';
+    }
+    if (window.location.search.indexOf('registered=1') !== -1) {
+      document.getElementById('reg-banner').style.display = 'flex';
+    }
+  });
+
+  function doLogin() {
+    var username = document.getElementById('l-username').value.trim();
+    var password = document.getElementById('l-password').value;
+    var ok = true;
+
+    // Reset all error states before re-validating
+    document.getElementById('login-alert').style.display = 'none';
+    document.getElementById('l-username').classList.remove('error');
+    document.getElementById('l-password').classList.remove('error');
+    document.getElementById('err-lusername').style.display = 'none';
+    document.getElementById('err-lpassword').style.display = 'none';
+
+    // Client-side presence checks
+    if (!username) {
+      document.getElementById('l-username').classList.add('error');
+      document.getElementById('err-lusername').style.display = 'block';
+      ok = false;
+    }
+    if (!password) {
+      document.getElementById('l-password').classList.add('error');
+      document.getElementById('err-lpassword').style.display = 'block';
+      ok = false;
+    }
+    if (!ok) return;
+
+    // Attempt login via GeoAuth (checks localStorage + sets cookie)
+    var user = GeoAuth.login(username, password);
+    if (!user) {
+      // Wrong credentials — show red alert banner and highlight fields
+      var alert = document.getElementById('login-alert');
+      alert.textContent = 'Incorrect username or password. Please try again.';
+      alert.style.display = 'block';
+      document.getElementById('l-username').classList.add('error');
+      document.getElementById('l-password').classList.add('error');
+      return;
+    }
+
+    // Credentials matched — swap form for success screen then redirect
+    document.getElementById('login-form').style.display = 'none';
+    document.getElementById('success-greeting').textContent =
+      'Welcome back, ' + user.fname + '! 👋';
+    document.getElementById('login-success').style.display = 'block';
+
+    setTimeout(function () {
+      window.location.href = 'learn.html';
+    }, 1500);
+  }
+
+  // Allow pressing Enter anywhere on the page to trigger sign-in
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') doLogin();
+  });
+</script>
+</body>
+</html>

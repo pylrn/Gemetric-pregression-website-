@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<!-- ============================================================
+     index.html  —  GeoLearn Home / Landing Page
+     ============================================================
+     Purpose:
+       The entry point of the site. Introduces GeoLearn,
+       displays key stats (7 lessons, 10 quiz questions etc.),
+       and directs visitors to Register or Start Learning.
+
+     Sections:
+       • <nav>   — Sticky top navigation bar (shared layout on all pages)
+       • .hero   — Full-viewport hero with headline, subtext and CTA buttons
+       • .stats  — Quick-glance numbers (lessons, shapes, questions)
+       • .section (features)  — Feature cards explaining what the course offers
+       • .section (path)      — Step-by-step learning path walkthrough
+       • <footer> — Site-wide footer with contact info
+
+     Scripts:
+       • auth.js (bottom of body) — injects the profile avatar widget
+         and Login link into the nav based on session cookie state.
+         No other page-specific JS on this page.
+     ============================================================ -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GeoLearn – Home</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0f1117; --surface: #1a1d27; --card: #21253a;
+      --accent: #4f8ef7; --text: #e8eaf6; --muted: #8b90a8; --radius: 14px;
+    }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', Arial, sans-serif; min-height: 100vh; }
+    nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 40px; height: 64px;
+      background: rgba(15,17,23,0.9); backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      position: sticky; top: 0; z-index: 100;
+    }
+    .nav-logo { font-size: 1.4rem; font-weight: 800; color: var(--accent); text-decoration: none; letter-spacing: 1px; }
+    .nav-links { display: flex; gap: 6px; flex-wrap: wrap; }
+    .nav-links a { color: var(--muted); text-decoration: none; padding: 8px 14px; border-radius: 8px; font-size: 0.93rem; transition: all 0.2s; }
+    .nav-links a:hover, .nav-links a.active { background: var(--card); color: var(--text); }
+    .nav-links a.cta { background: var(--accent); color: #fff; font-weight: 700; }
+    .nav-links a.cta:hover { opacity: 0.85; }
+    .hero {
+      min-height: calc(100vh - 64px); display: flex; flex-direction: column;
+      align-items: center; justify-content: center; text-align: center; padding: 60px 24px;
+      background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(79,142,247,0.18) 0%, transparent 70%);
+    }
+    .hero-tag {
+      display: inline-block; background: rgba(79,142,247,0.12); color: var(--accent);
+      border: 1px solid rgba(79,142,247,0.3); border-radius: 20px;
+      padding: 6px 18px; font-size: 0.82rem; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 24px;
+    }
+    .hero h1 { font-size: clamp(2.2rem, 6vw, 4rem); font-weight: 800; line-height: 1.15; margin-bottom: 20px; }
+    .hero h1 span { color: var(--accent); }
+    .hero p { font-size: 1.1rem; color: var(--muted); max-width: 520px; line-height: 1.75; margin-bottom: 40px; }
+    .hero-btns { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+    .btn { padding: 14px 32px; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 1rem; transition: all 0.2s; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { opacity: 0.85; transform: translateY(-2px); }
+    .btn-secondary { background: var(--card); color: var(--text); border: 1px solid rgba(255,255,255,0.1); }
+    .btn-secondary:hover { background: #2a2f47; transform: translateY(-2px); }
+    .stats { display: flex; gap: 40px; flex-wrap: wrap; justify-content: center; margin-top: 56px; }
+    .stat { text-align: center; }
+    .stat-num { font-size: 2rem; font-weight: 800; color: var(--accent); }
+    .stat-label { font-size: 0.82rem; color: var(--muted); margin-top: 4px; }
+    .section { padding: 80px 40px; max-width: 1100px; margin: 0 auto; }
+    .section-label { font-size: 0.82rem; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+    .section h2 { font-size: 1.9rem; font-weight: 700; margin-bottom: 48px; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; }
+    .card { background: var(--card); border-radius: var(--radius); padding: 28px; border: 1px solid rgba(255,255,255,0.07); transition: transform 0.2s, box-shadow 0.2s; }
+    .card:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,0.45); }
+    .card-icon { font-size: 2rem; margin-bottom: 16px; }
+    .card h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 8px; }
+    .card p { color: var(--muted); font-size: 0.92rem; line-height: 1.65; }
+    .path { display: flex; flex-direction: column; }
+    .path-step { display: flex; gap: 24px; align-items: flex-start; padding: 28px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .path-step:last-child { border-bottom: none; }
+    .step-num { min-width: 44px; height: 44px; border-radius: 50%; background: rgba(79,142,247,0.15); border: 1px solid rgba(79,142,247,0.3); color: var(--accent); font-weight: 700; display: flex; align-items: center; justify-content: center; }
+    .step-content h3 { font-size: 1rem; font-weight: 700; margin-bottom: 6px; }
+    .step-content p { color: var(--muted); font-size: 0.9rem; line-height: 1.6; margin-bottom: 8px; }
+    .step-content a { color: var(--accent); text-decoration: none; font-size: 0.9rem; }
+    .step-content a:hover { text-decoration: underline; }
+    footer { text-align: center; padding: 32px; color: var(--muted); font-size: 0.85rem; border-top: 1px solid rgba(255,255,255,0.06); }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="index.html">GeoLearn</a>
+  <div class="nav-links">
+    <a href="index.html" class="active">Home</a>
+    <a href="register.html">Register</a>
+    <a href="learn.html">Learn</a>
+    <a href="assesment.html">Assessment</a>
+    <a href="feedback.html">Feedback</a>
+    <a href="register.html" class="cta">Get Started</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="hero-tag">Free Geometry Course</div>
+  <h1>Master <span>Geometric Shapes</span><br>the Smart Way</h1>
+  <p>Interactive lessons, videos, and quizzes to help you understand areas, perimeters, and real-world uses of geometry.</p>
+  <div class="hero-btns">
+    <a href="learn.html" class="btn btn-primary">Start Learning</a>
+    <a href="register.html" class="btn btn-secondary">Register Free</a>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="stat-num">7</div><div class="stat-label">Lesson Pages</div></div>
+    <div class="stat"><div class="stat-num">6</div><div class="stat-label">Shapes Covered</div></div>
+    <div class="stat"><div class="stat-num">10</div><div class="stat-label">Quiz Questions</div></div>
+    <div class="stat"><div class="stat-num">100%</div><div class="stat-label">Free Access</div></div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-label">Why GeoLearn</div>
+  <h2>Everything you need to learn geometry</h2>
+  <div class="cards">
+    <div class="card"><div class="card-icon">📐</div><h3>Visual Lessons</h3><p>Each shape is explained with diagrams and interactive calculators so concepts really stick.</p></div>
+    <div class="card"><div class="card-icon">🎥</div><h3>Video & Audio</h3><p>Embedded explainer videos and audio narrations walk you through every topic at your own pace.</p></div>
+    <div class="card"><div class="card-icon">🧪</div><h3>Hands-on Quizzes</h3><p>Test your knowledge with varied question types. Instant, friendly feedback every time.</p></div>
+    <div class="card"><div class="card-icon">🌍</div><h3>Real-world Context</h3><p>See how geometry is used in architecture, art, engineering, and everyday life.</p></div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-label">Learning Path</div>
+  <h2>Your journey through the course</h2>
+  <div class="path">
+    <div class="path-step">
+      <div class="step-num">1</div>
+      <div class="step-content"><h3>Register for the course</h3><p>Create your free account to track progress and unlock all content.</p><a href="register.html">Register now →</a></div>
+    </div>
+    <div class="path-step">
+      <div class="step-num">2</div>
+      <div class="step-content"><h3>Work through the Learn modules</h3><p>Seven pages covering Rectangle, Circle, Triangle, Square, Parallelogram, Trapezium, and 3D Shapes.</p><a href="learn.html">Go to Lessons →</a></div>
+    </div>
+    <div class="path-step">
+      <div class="step-num">3</div>
+      <div class="step-content"><h3>Take the Assessment</h3><p>Answer 10 varied questions to test what you've learned — no case sensitivity, no tricks.</p><a href="assesment.html">Take the Quiz →</a></div>
+    </div>
+    <div class="path-step">
+      <div class="step-num">4</div>
+      <div class="step-content"><h3>Share your feedback</h3><p>Tell us how we can improve and help future learners.</p><a href="feedback.html">Leave Feedback →</a></div>
+    </div>
+  </div>
+</div>
+
+<footer>&copy; 2026 GeoLearn &nbsp;|&nbsp; support@geolearn.com &nbsp;|&nbsp; +91 90000 00000</footer>
+<script src="auth.js"></script>
+</body>
+</html>

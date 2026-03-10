@@ -1,0 +1,830 @@
+<!--
+  ================================================================
+  content-reference.html  —  GeoLearn HTML Content Reference
+  ================================================================
+  This file contains ONLY the body content sections from each page.
+  No CSS, no JavaScript, no nav, no footer.
+  Copy-paste the section you need.
+  ================================================================
+-->
+
+
+<!-- ============================================================
+     1. INDEX.HTML — Hero + Stats + Feature Cards + Learning Path
+     ============================================================ -->
+
+<div class="hero">
+  <div class="hero-tag">Free Geometry Course</div>
+  <h1>Master <span>Geometric Shapes</span><br>the Smart Way</h1>
+  <p>Interactive lessons, videos, and quizzes to help you understand areas, perimeters, and real-world uses of geometry.</p>
+  <div class="hero-btns">
+    <a href="learn.html" class="btn btn-primary">Start Learning</a>
+    <a href="register.html" class="btn btn-secondary">Register Free</a>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="stat-num">7</div><div class="stat-label">Lesson Pages</div></div>
+    <div class="stat"><div class="stat-num">6</div><div class="stat-label">Shapes Covered</div></div>
+    <div class="stat"><div class="stat-num">10</div><div class="stat-label">Quiz Questions</div></div>
+    <div class="stat"><div class="stat-num">100%</div><div class="stat-label">Free Access</div></div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-label">Why GeoLearn</div>
+  <h2>Everything you need to learn geometry</h2>
+  <div class="cards">
+    <div class="card"><div class="card-icon">📐</div><h3>Visual Lessons</h3><p>Each shape is explained with diagrams and interactive calculators so concepts really stick.</p></div>
+    <div class="card"><div class="card-icon">🎥</div><h3>Video & Audio</h3><p>Embedded explainer videos and audio narrations walk you through every topic at your own pace.</p></div>
+    <div class="card"><div class="card-icon">🧪</div><h3>Hands-on Quizzes</h3><p>Test your knowledge with varied question types. Instant, friendly feedback every time.</p></div>
+    <div class="card"><div class="card-icon">🌍</div><h3>Real-world Context</h3><p>See how geometry is used in architecture, art, engineering, and everyday life.</p></div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-label">Learning Path</div>
+  <h2>Your journey through the course</h2>
+  <div class="path">
+    <div class="path-step">
+      <div class="step-num">1</div>
+      <div class="step-content"><h3>Register for the course</h3><p>Create your free account to track progress and unlock all content.</p><a href="register.html">Register now →</a></div>
+    </div>
+    <div class="path-step">
+      <div class="step-num">2</div>
+      <div class="step-content"><h3>Work through the Learn modules</h3><p>Seven pages covering Rectangle, Circle, Triangle, Square, Parallelogram, Trapezium, and 3D Shapes.</p><a href="learn.html">Go to Lessons →</a></div>
+    </div>
+    <div class="path-step">
+      <div class="step-num">3</div>
+      <div class="step-content"><h3>Take the Assessment</h3><p>Answer 10 varied questions to test what you've learned — no case sensitivity, no tricks.</p><a href="assesment.html">Take the Quiz →</a></div>
+    </div>
+    <div class="path-step">
+      <div class="step-num">4</div>
+      <div class="step-content"><h3>Share your feedback</h3><p>Tell us how we can improve and help future learners.</p><a href="feedback.html">Leave Feedback →</a></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     2. REGISTER.HTML — Stepper + 3-Step Form + Success Screen
+     ============================================================ -->
+
+<div class="container">
+  <div class="page-tag">Free Enrolment</div>
+  <h1>Course Registration</h1>
+  <p class="sub">Fill in your details below to create your free GeoLearn account and unlock all seven geometry modules.</p>
+
+  <!-- STEPPER -->
+  <div class="stepper" id="stepper">
+    <div class="step-dot active" id="dot-0">1</div>
+    <div class="step-line" id="line-0"></div>
+    <div class="step-dot" id="dot-1">2</div>
+    <div class="step-line" id="line-1"></div>
+    <div class="step-dot" id="dot-2">3</div>
+  </div>
+  <div class="step-labels">
+    <span class="step-label active" id="lbl-0">Personal</span>
+    <span class="step-label" id="lbl-1">Academic</span>
+    <span class="step-label" id="lbl-2">Account</span>
+  </div>
+
+  <!-- STEP 1: PERSONAL INFO -->
+  <div class="form-section active" id="sec-0">
+    <div class="section-title">Step 1 — Personal Information</div>
+    <div class="fields-grid">
+      <div class="field">
+        <label for="r-fname">First Name <span class="req">*</span></label>
+        <input type="text" id="r-fname" placeholder="e.g. Aisha" autocomplete="given-name" />
+        <div class="err-msg" id="err-fname">Please enter your first name.</div>
+      </div>
+      <div class="field">
+        <label for="r-lname">Last Name <span class="req">*</span></label>
+        <input type="text" id="r-lname" placeholder="e.g. Sharma" autocomplete="family-name" />
+        <div class="err-msg" id="err-lname">Please enter your last name.</div>
+      </div>
+      <div class="field full">
+        <label for="r-email">Email Address <span class="req">*</span></label>
+        <input type="email" id="r-email" placeholder="you@example.com" autocomplete="email" />
+        <div class="err-msg" id="err-email">Please enter a valid email address.</div>
+      </div>
+      <div class="field">
+        <label for="r-phone">Phone Number <span class="req">*</span></label>
+        <input type="tel" id="r-phone" placeholder="+91 98765 43210" autocomplete="tel" />
+        <div class="err-msg" id="err-phone">Enter a valid phone number (10–15 digits).</div>
+      </div>
+      <div class="field">
+        <label for="r-dob">Date of Birth <span class="req">*</span></label>
+        <input type="date" id="r-dob" autocomplete="bday" />
+        <div class="err-msg" id="err-dob">Please enter your date of birth.</div>
+      </div>
+      <div class="field full">
+        <label for="r-country">Country <span class="req">*</span></label>
+        <select id="r-country">
+          <option value="">Select country...</option>
+          <option>India</option><option>United States</option><option>United Kingdom</option>
+          <option>Canada</option><option>Australia</option><option>Germany</option>
+          <option>France</option><option>UAE</option><option>Singapore</option>
+          <option>South Africa</option><option>Other</option>
+        </select>
+        <div class="err-msg" id="err-country">Please select your country.</div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="goStep(1)">Next: Academic Info →</button>
+    </div>
+  </div>
+
+  <!-- STEP 2: ACADEMIC INFO -->
+  <div class="form-section" id="sec-1">
+    <div class="section-title">Step 2 — Academic Information</div>
+    <div class="fields-grid">
+      <div class="field full">
+        <label for="r-institution">College / Institution Name <span class="req">*</span></label>
+        <input type="text" id="r-institution" placeholder="e.g. VIT University" />
+        <div class="err-msg" id="err-institution">Please enter your institution name.</div>
+      </div>
+      <div class="field">
+        <label for="r-degree">Degree / Programme <span class="req">*</span></label>
+        <select id="r-degree">
+          <option value="">Select programme...</option>
+          <option>Bachelor of Science (BSc)</option>
+          <option>Bachelor of Arts (BA)</option>
+          <option>Bachelor of Commerce (BCom)</option>
+          <option>Bachelor of Engineering (BE / BTech)</option>
+          <option>Bachelor of Architecture (BArch)</option>
+          <option>Bachelor of Education (BEd)</option>
+          <option>Master's Degree</option>
+          <option>PhD / Doctoral</option>
+          <option>Diploma / Certificate</option>
+          <option>Other</option>
+        </select>
+        <div class="err-msg" id="err-degree">Please select your programme.</div>
+      </div>
+      <div class="field">
+        <label for="r-year">Current Year / Semester <span class="req">*</span></label>
+        <select id="r-year">
+          <option value="">Select year...</option>
+          <option>1st Year / Semester 1–2</option>
+          <option>2nd Year / Semester 3–4</option>
+          <option>3rd Year / Semester 5–6</option>
+          <option>4th Year / Semester 7–8</option>
+          <option>Postgraduate Year 1</option>
+          <option>Postgraduate Year 2+</option>
+        </select>
+        <div class="err-msg" id="err-year">Please select your current year.</div>
+      </div>
+      <div class="field full">
+        <label for="r-regno">Registration Number <span class="req">*</span></label>
+        <input type="text" id="r-regno" placeholder="e.g. 24BCE2649" maxlength="9" style="text-transform:uppercase" />
+        <div class="err-msg" id="err-regno">Format: 2 digits + 3 letters + 4 digits (e.g. 24BCE2649).</div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="goStep(0)">← Back</button>
+      <button class="btn btn-primary" onclick="goStep(2)">Next: Create Account →</button>
+    </div>
+  </div>
+
+  <!-- STEP 3: ACCOUNT SETUP -->
+  <div class="form-section" id="sec-2">
+    <div class="section-title">Step 3 — Account Setup</div>
+    <div class="fields-grid">
+      <div class="field">
+        <label for="r-username">Username <span class="req">*</span></label>
+        <input type="text" id="r-username" placeholder="e.g. aisha_geo" autocomplete="username" />
+        <div class="err-msg" id="err-username">3–20 characters; letters, numbers and _ only.</div>
+      </div>
+      <div class="field" style="visibility:hidden"></div>
+      <div class="field">
+        <label for="r-password">Password <span class="req">*</span></label>
+        <input type="password" id="r-password" placeholder="Min. 8 characters" autocomplete="new-password" />
+        <div class="err-msg" id="err-password">Password must be at least 8 characters.</div>
+      </div>
+      <div class="field">
+        <label for="r-confirm">Confirm Password <span class="req">*</span></label>
+        <input type="password" id="r-confirm" placeholder="Repeat password" autocomplete="new-password" />
+        <div class="err-msg" id="err-confirm">Passwords do not match.</div>
+      </div>
+    </div>
+    <div class="terms-row">
+      <input type="checkbox" id="r-terms" />
+      <span>I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>. I confirm that the information provided is accurate. <span class="req">*</span></span>
+    </div>
+    <div class="err-msg" id="err-terms" style="margin-top:6px">You must accept the terms to continue.</div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="goStep(1)">← Back</button>
+      <button class="btn btn-primary" onclick="submitReg()">Create My Account →</button>
+    </div>
+  </div>
+
+  <!-- SUCCESS SCREEN -->
+  <div class="success" id="reg-success">
+    <div class="success-icon">🎉</div>
+    <h2 id="success-name">You're registered!</h2>
+    <p>Your GeoLearn account has been created. <strong>Redirecting you to sign in…</strong></p>
+    <a href="login.html">Sign In Now →</a>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     3. LOGIN.HTML — Login Card
+     ============================================================ -->
+
+<div class="login-wrap">
+  <div class="login-card">
+    <div class="login-icon">🔐</div>
+    <div class="page-tag">Welcome Back</div>
+    <h1>Sign In</h1>
+    <p class="login-sub">Don't have an account? <a href="register.html">Register free →</a></p>
+
+    <div id="login-form">
+      <div class="reg-banner" id="reg-banner">
+        <span style="font-size:1.1rem">✅</span>
+        <span>Account created! Please sign in to continue.</span>
+      </div>
+      <div class="alert" id="login-alert"></div>
+
+      <div class="field">
+        <label for="l-username">Username</label>
+        <input type="text" id="l-username" placeholder="Your username" autocomplete="username" />
+        <div class="err-msg" id="err-lusername">Please enter your username.</div>
+      </div>
+      <div class="field">
+        <label for="l-password">Password</label>
+        <input type="password" id="l-password" placeholder="Your password" autocomplete="current-password" />
+        <div class="err-msg" id="err-lpassword">Please enter your password.</div>
+      </div>
+
+      <button class="btn-login" onclick="doLogin()">Sign In →</button>
+
+      <div class="divider">— or —</div>
+      <a href="register.html" class="register-link">Create a Free Account</a>
+    </div>
+
+    <!-- Success (shown briefly before redirect) -->
+    <div class="success-msg" id="login-success">
+      <div class="icon">✅</div>
+      <h2 id="success-greeting">Welcome back!</h2>
+      <p>Redirecting you to the lessons…</p>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     4. LEARN.HTML — Sidebar + 7 Lesson Pages
+     ============================================================ -->
+
+<div class="learn-layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <h3>Progress</h3>
+    <div class="prog-bar"><div class="prog-fill" id="progFill" style="width:14%"></div></div>
+    <h3>Lessons</h3>
+    <a href="#" class="active" onclick="showPage(0,this)">1 · Introduction</a>
+    <a href="#" onclick="showPage(1,this)">2 · Rectangle</a>
+    <a href="#" onclick="showPage(2,this)">3 · Circle</a>
+    <a href="#" onclick="showPage(3,this)">4 · Triangle</a>
+    <a href="#" onclick="showPage(4,this)">5 · Square & Parallelogram</a>
+    <a href="#" onclick="showPage(5,this)">6 · Trapezium</a>
+    <a href="#" onclick="showPage(6,this)">7 · 3D Shapes</a>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="content">
+
+    <!-- PAGE 0: INTRODUCTION -->
+    <div class="page active" id="page-0">
+      <div class="page-header">
+        <div class="page-tag">Lesson 1 of 7</div>
+        <h1>Introduction to Geometry</h1>
+        <p>Geometry is the branch of mathematics that studies shapes, sizes, and the properties of space. From the floor beneath your feet to the screen you're reading now — geometry is everywhere.</p>
+      </div>
+      <div class="video-wrap">
+        <iframe src="https://www.youtube.com/embed/k5etrWdIY6o" title="Math Antics - Points, Lines, & Planes" allowfullscreen></iframe>
+      </div>
+      <section>
+        <h2>What is Geometry?</h2>
+        <p>The word <strong>geometry</strong> comes from the Greek words <em>geo</em> (earth) and <em>metron</em> (measurement). Ancient Egyptians used it to resurvey land after Nile floods; Greek mathematicians like Euclid turned it into a formal science.</p>
+        <p>In this course you will explore <strong>2D shapes</strong> — flat figures with length and width — and finish with an introduction to <strong>3D shapes</strong> that also have depth.</p>
+      </section>
+      <div class="info-grid">
+        <div class="info-card"><h4>2D Shapes</h4><p>Rectangle, Circle, Triangle, Square, Parallelogram, Trapezium</p></div>
+        <div class="info-card"><h4>Key measures</h4><p>Area, Perimeter, Circumference, Volume</p></div>
+        <div class="info-card"><h4>Real uses</h4><p>Architecture, Art, Engineering, Navigation, Sports</p></div>
+      </div>
+      <div class="audio-block">
+        <h4>🔊 Listen: What is Geometry? (narrated overview)</h4>
+        <button class="calc-btn" onclick="speak('...')">▶ Play Narration</button>
+      </div>
+      <div class="fact-box">
+        <div class="fact-label">💡 Did You Know?</div>
+        <p>Euclid's <em>Elements</em>, written around 300 BC, is one of the most influential textbooks in history — it was used in schools for over 2,000 years!</p>
+      </div>
+      <ul class="styled-list">
+        <li>Geometry helps architects design safe buildings</li>
+        <li>GPS navigation relies on geometric calculations</li>
+        <li>Video game graphics are built entirely from geometric shapes</li>
+        <li>Medical imaging (MRI / CT) uses geometry to reconstruct 3D body images</li>
+      </ul>
+      <div class="page-nav">
+        <span class="progress-text">Page 1 / 7</span>
+        <button class="btn btn-primary" onclick="nextPage()">Next: Rectangle →</button>
+      </div>
+    </div>
+
+    <!-- PAGE 1: RECTANGLE -->
+    <div class="page" id="page-1">
+      <div class="page-header">
+        <div class="page-tag">Lesson 2 of 7</div>
+        <h1>Rectangle</h1>
+        <p>A rectangle is a four-sided shape with four right angles. Opposite sides are equal and parallel.</p>
+      </div>
+      <div class="shape-demo">
+        <svg width="280" height="160" viewBox="0 0 280 160">
+          <rect x="20" y="30" width="240" height="100" rx="4" fill="rgba(79,142,247,0.15)" stroke="#4f8ef7" stroke-width="2.5"/>
+          <text x="140" y="82" fill="#4f8ef7" font-size="14" text-anchor="middle" font-family="Segoe UI">Area = l × b</text>
+          <text x="140" y="20" fill="#8b90a8" font-size="12" text-anchor="middle" font-family="Segoe UI">l (length)</text>
+          <text x="268" y="82" fill="#8b90a8" font-size="12" text-anchor="middle" transform="rotate(90,268,82)" font-family="Segoe UI">b</text>
+        </svg>
+      </div>
+      <div class="formula">Area = Length × Breadth &nbsp;|&nbsp; Perimeter = 2 × (l + b)</div>
+      <div class="video-wrap">
+        <iframe src="https://www.youtube.com/embed/AAY1bsazcgM" title="Math Antics - Perimeter" allowfullscreen></iframe>
+      </div>
+      <section>
+        <h2>Key Properties</h2>
+        <ul class="styled-list">
+          <li>4 right angles (each = 90°)</li>
+          <li>Opposite sides are equal in length</li>
+          <li>Diagonals bisect each other and are equal</li>
+          <li>A square is a special rectangle where all sides are equal</li>
+        </ul>
+        <h2>Real-world Applications</h2>
+        <p>Rectangles are the most common shape in construction. Rooms, doors, windows, screens, and swimming pools are almost always rectangular.</p>
+      </section>
+      <div class="info-grid">
+        <div class="info-card"><h4>Example</h4><p>Room: l = 5 m, b = 4 m<br>Area = 20 m²</p></div>
+        <div class="info-card"><h4>Example</h4><p>Football pitch: 105 × 68 m<br>Area = 7,140 m²</p></div>
+      </div>
+      <div class="calc">
+        <h3>🧮 Rectangle Calculator</h3>
+        <div class="calc-row"><label>Length</label><input id="rl" type="number" placeholder="e.g. 5" min="0"></div>
+        <div class="calc-row"><label>Breadth</label><input id="rb" type="number" placeholder="e.g. 3" min="0"></div>
+        <button class="calc-btn" onclick="calcRect()">Calculate</button>
+        <div class="calc-result" id="rect-result"></div>
+      </div>
+      <div class="fact-box">
+        <div class="fact-label">💡 Fun Fact</div>
+        <p>The A4 paper size (210 × 297 mm) is a rectangle with a special ratio — each time you fold it in half, you get the next "A" size with the same aspect ratio!</p>
+      </div>
+      <div class="page-nav">
+        <button class="btn btn-secondary" onclick="prevPage()">← Previous</button>
+        <span class="progress-text">Page 2 / 7</span>
+        <button class="btn btn-primary" onclick="nextPage()">Next: Circle →</button>
+      </div>
+    </div>
+
+    <!-- PAGE 2: CIRCLE -->
+    <div class="page" id="page-2">
+      <div class="page-header">
+        <div class="page-tag">Lesson 3 of 7</div>
+        <h1>Circle</h1>
+        <p>A circle is a perfectly round shape where every point on its boundary is the same distance from the centre, called the <strong>radius</strong>.</p>
+      </div>
+      <div class="shape-demo">
+        <svg width="200" height="200" viewBox="0 0 200 200">
+          <circle cx="100" cy="100" r="80" fill="rgba(79,142,247,0.12)" stroke="#4f8ef7" stroke-width="2.5"/>
+          <line x1="100" y1="100" x2="180" y2="100" stroke="#4f8ef7" stroke-width="1.5" stroke-dasharray="5,3"/>
+          <text x="140" y="94" fill="#4f8ef7" font-size="13" text-anchor="middle" font-family="Segoe UI">r</text>
+          <circle cx="100" cy="100" r="4" fill="#4f8ef7"/>
+          <text x="100" y="115" fill="#8b90a8" font-size="12" text-anchor="middle" font-family="Segoe UI">centre</text>
+        </svg>
+      </div>
+      <div class="formula">Area = π r² &nbsp;|&nbsp; Circumference = 2π r &nbsp;|&nbsp; π ≈ 3.14159</div>
+      <div class="video-wrap">
+        <iframe src="https://www.youtube.com/embed/O-cawByg2aA" title="Math Antics - Circles, Circumference & Area" allowfullscreen></iframe>
+      </div>
+      <section>
+        <h2>Key Properties</h2>
+        <ul class="styled-list">
+          <li>Radius (r) — distance from centre to any boundary point</li>
+          <li>Diameter (d = 2r) — straight line through the centre</li>
+          <li>Circumference — the perimeter of a circle</li>
+          <li>π (pi) is a constant ≈ 3.14159, it never ends or repeats</li>
+        </ul>
+      </section>
+      <div class="calc">
+        <h3>🧮 Circle Calculator</h3>
+        <div class="calc-row"><label>Radius</label><input id="cr" type="number" placeholder="e.g. 7" min="0"></div>
+        <button class="calc-btn" onclick="calcCircle()">Calculate</button>
+        <div class="calc-result" id="circle-result"></div>
+      </div>
+      <div class="fact-box">
+        <div class="fact-label">💡 Fun Fact</div>
+        <p>Tyres, coins, wheels, and planets are all circular because the circle is the most efficient shape — it encloses the maximum area for a given perimeter.</p>
+      </div>
+      <div class="page-nav">
+        <button class="btn btn-secondary" onclick="prevPage()">← Previous</button>
+        <span class="progress-text">Page 3 / 7</span>
+        <button class="btn btn-primary" onclick="nextPage()">Next: Triangle →</button>
+      </div>
+    </div>
+
+    <!-- PAGE 3: TRIANGLE -->
+    <div class="page" id="page-3">
+      <div class="page-header">
+        <div class="page-tag">Lesson 4 of 7</div>
+        <h1>Triangle</h1>
+        <p>A triangle is a polygon with three sides and three angles. The sum of interior angles always equals 180°.</p>
+      </div>
+      <div class="shape-demo">
+        <svg width="240" height="200" viewBox="0 0 240 200">
+          <polygon points="120,20 220,180 20,180" fill="rgba(79,142,247,0.12)" stroke="#4f8ef7" stroke-width="2.5"/>
+          <line x1="120" y1="180" x2="120" y2="20" stroke="#4f8ef7" stroke-width="1.5" stroke-dasharray="5,3"/>
+          <text x="126" y="105" fill="#4f8ef7" font-size="12" font-family="Segoe UI">h</text>
+          <text x="120" y="196" fill="#8b90a8" font-size="12" text-anchor="middle" font-family="Segoe UI">base (b)</text>
+        </svg>
+      </div>
+      <div class="formula">Area = ½ × base × height &nbsp;|&nbsp; Perimeter = a + b + c</div>
+      <div class="video-wrap">
+        <iframe src="https://www.youtube.com/embed/mLeNaZcy-hE" title="Math Antics - Triangles" allowfullscreen></iframe>
+      </div>
+      <section>
+        <h2>Types of Triangle</h2>
+        <div class="info-grid">
+          <div class="info-card"><h4>Equilateral</h4><p>All 3 sides equal · All angles = 60°</p></div>
+          <div class="info-card"><h4>Isosceles</h4><p>2 sides equal · 2 base angles equal</p></div>
+          <div class="info-card"><h4>Scalene</h4><p>All sides different · All angles different</p></div>
+          <div class="info-card"><h4>Right-angled</h4><p>One angle = 90° · Pythagoras applies: a²+b²=c²</p></div>
+        </div>
+      </section>
+      <div class="calc">
+        <h3>🧮 Triangle Area Calculator</h3>
+        <div class="calc-row"><label>Base</label><input id="tb" type="number" placeholder="e.g. 6" min="0"></div>
+        <div class="calc-row"><label>Height</label><input id="th" type="number" placeholder="e.g. 4" min="0"></div>
+        <button class="calc-btn" onclick="calcTri()">Calculate</button>
+        <div class="calc-result" id="tri-result"></div>
+      </div>
+      <div class="fact-box">
+        <div class="fact-label">💡 Fun Fact</div>
+        <p>Triangles are the strongest shape in engineering — that's why bridges, roof trusses, and the Eiffel Tower are full of triangles.</p>
+      </div>
+      <div class="page-nav">
+        <button class="btn btn-secondary" onclick="prevPage()">← Previous</button>
+        <span class="progress-text">Page 4 / 7</span>
+        <button class="btn btn-primary" onclick="nextPage()">Next: Square & Parallelogram →</button>
+      </div>
+    </div>
+
+    <!-- PAGE 4: SQUARE & PARALLELOGRAM -->
+    <div class="page" id="page-4">
+      <div class="page-header">
+        <div class="page-tag">Lesson 5 of 7</div>
+        <h1>Square &amp; Parallelogram</h1>
+        <p>Two closely related four-sided shapes with distinct properties and formulas.</p>
+      </div>
+      <section>
+        <h2>Square</h2>
+        <p>A square is a rectangle where all four sides are equal. All angles are 90°.</p>
+        <div class="formula">Area = side² &nbsp;|&nbsp; Perimeter = 4 × side</div>
+        <div class="shape-demo">
+          <svg width="160" height="160" viewBox="0 0 160 160">
+            <rect x="20" y="20" width="120" height="120" rx="4" fill="rgba(79,142,247,0.12)" stroke="#4f8ef7" stroke-width="2.5"/>
+            <text x="80" y="115" fill="#8b90a8" font-size="12" text-anchor="middle" font-family="Segoe UI">side (s)</text>
+            <text x="80" y="82" fill="#4f8ef7" font-size="13" text-anchor="middle" font-family="Segoe UI">s²</text>
+          </svg>
+        </div>
+        <h2>Parallelogram</h2>
+        <p>A parallelogram has two pairs of parallel sides. Opposite sides are equal; opposite angles are equal.</p>
+        <div class="formula">Area = base × height &nbsp;|&nbsp; Perimeter = 2 × (a + b)</div>
+      </section>
+      <div class="video-wrap">
+        <iframe src="https://www.youtube.com/embed/xCdxURXMdFY" title="Math Antics - Area" allowfullscreen></iframe>
+      </div>
+      <div class="calc">
+        <h3>🧮 Square Calculator</h3>
+        <div class="calc-row"><label>Side</label><input id="ss" type="number" placeholder="e.g. 5" min="0"></div>
+        <button class="calc-btn" onclick="calcSquare()">Calculate</button>
+        <div class="calc-result" id="sq-result"></div>
+      </div>
+      <div class="calc">
+        <h3>🧮 Parallelogram Calculator</h3>
+        <div class="calc-row"><label>Base</label><input id="pb" type="number" placeholder="e.g. 8" min="0"></div>
+        <div class="calc-row"><label>Height</label><input id="ph" type="number" placeholder="e.g. 5" min="0"></div>
+        <button class="calc-btn" onclick="calcPara()">Calculate</button>
+        <div class="calc-result" id="para-result"></div>
+      </div>
+      <div class="fact-box">
+        <div class="fact-label">💡 Did You Know?</div>
+        <p>Every rectangle is a parallelogram, but not every parallelogram is a rectangle. A rhombus is a parallelogram where all sides are equal — like a diamond shape.</p>
+      </div>
+      <div class="page-nav">
+        <button class="btn btn-secondary" onclick="prevPage()">← Previous</button>
+        <span class="progress-text">Page 5 / 7</span>
+        <button class="btn btn-primary" onclick="nextPage()">Next: Trapezium →</button>
+      </div>
+    </div>
+
+    <!-- PAGE 5: TRAPEZIUM -->
+    <div class="page" id="page-5">
+      <div class="page-header">
+        <div class="page-tag">Lesson 6 of 7</div>
+        <h1>Trapezium</h1>
+        <p>A trapezium (called a trapezoid in the US) has exactly one pair of parallel sides, called the <strong>bases</strong>.</p>
+      </div>
+      <div class="shape-demo">
+        <svg width="280" height="160" viewBox="0 0 280 160">
+          <polygon points="60,20 220,20 260,140 20,140" fill="rgba(79,142,247,0.12)" stroke="#4f8ef7" stroke-width="2.5"/>
+          <text x="140" y="14" fill="#8b90a8" font-size="11" text-anchor="middle" font-family="Segoe UI">a (top base)</text>
+          <text x="140" y="156" fill="#8b90a8" font-size="11" text-anchor="middle" font-family="Segoe UI">b (bottom base)</text>
+          <line x1="140" y1="20" x2="140" y2="140" stroke="#4f8ef7" stroke-width="1.5" stroke-dasharray="5,3"/>
+          <text x="148" y="84" fill="#4f8ef7" font-size="12" font-family="Segoe UI">h</text>
+        </svg>
+      </div>
+      <div class="formula">Area = ½ × (a + b) × h</div>
+      <div class="video-wrap">
+        <iframe src="https://www.youtube.com/embed/yiREqzDsMP8" title="Math Antics - Quadrilaterals" allowfullscreen></iframe>
+      </div>
+      <section>
+        <h2>Properties</h2>
+        <ul class="styled-list">
+          <li>Exactly one pair of parallel sides (the two bases)</li>
+          <li>The two non-parallel sides are called legs</li>
+          <li>An isosceles trapezium has equal legs and equal base angles</li>
+          <li>A right trapezium has two right angles</li>
+        </ul>
+        <h2>Real-world Uses</h2>
+        <p>Trapezium shapes appear in dam cross-sections, handbags, road signs, and architectural facades.</p>
+      </section>
+      <div class="calc">
+        <h3>🧮 Trapezium Calculator</h3>
+        <div class="calc-row"><label>Top base (a)</label><input id="ta" type="number" placeholder="e.g. 4" min="0"></div>
+        <div class="calc-row"><label>Bottom base (b)</label><input id="tbb" type="number" placeholder="e.g. 8" min="0"></div>
+        <div class="calc-row"><label>Height (h)</label><input id="tph" type="number" placeholder="e.g. 5" min="0"></div>
+        <button class="calc-btn" onclick="calcTrap()">Calculate</button>
+        <div class="calc-result" id="trap-result"></div>
+      </div>
+      <div class="page-nav">
+        <button class="btn btn-secondary" onclick="prevPage()">← Previous</button>
+        <span class="progress-text">Page 6 / 7</span>
+        <button class="btn btn-primary" onclick="nextPage()">Next: 3D Shapes →</button>
+      </div>
+    </div>
+
+    <!-- PAGE 6: 3D SHAPES -->
+    <div class="page" id="page-6">
+      <div class="page-header">
+        <div class="page-tag">Lesson 7 of 7</div>
+        <h1>3D Shapes</h1>
+        <p>Three-dimensional shapes have length, width, and <strong>depth</strong>. They occupy space, which we measure as <em>volume</em>.</p>
+      </div>
+      <div class="video-wrap">
+        <iframe src="https://www.youtube.com/embed/qJwecTgce6c" title="Math Antics - Volume" allowfullscreen></iframe>
+      </div>
+      <section>
+        <h2>Common 3D Shapes</h2>
+        <div class="info-grid">
+          <div class="info-card"><h4>Cube</h4><p>Volume = s³<br>Surface Area = 6s²<br><em>e.g. dice, Rubik's cube</em></p></div>
+          <div class="info-card"><h4>Cuboid</h4><p>Volume = l × w × h<br>Surface Area = 2(lw + lh + wh)<br><em>e.g. boxes, rooms</em></p></div>
+          <div class="info-card"><h4>Sphere</h4><p>Volume = 4/3 πr³<br>Surface Area = 4πr²<br><em>e.g. ball, planet</em></p></div>
+          <div class="info-card"><h4>Cylinder</h4><p>Volume = πr²h<br>Surface Area = 2πr(r+h)<br><em>e.g. can, pipe</em></p></div>
+          <div class="info-card"><h4>Cone</h4><p>Volume = 1/3 πr²h<br><em>e.g. ice-cream cone, traffic cone</em></p></div>
+          <div class="info-card"><h4>Pyramid</h4><p>Volume = 1/3 × base area × h<br><em>e.g. Great Pyramid of Giza</em></p></div>
+        </div>
+      </section>
+      <div class="calc">
+        <h3>🧮 Cuboid Volume Calculator</h3>
+        <div class="calc-row"><label>Length</label><input id="cl" type="number" placeholder="e.g. 5" min="0"></div>
+        <div class="calc-row"><label>Width</label><input id="cw" type="number" placeholder="e.g. 4" min="0"></div>
+        <div class="calc-row"><label>Height</label><input id="ch" type="number" placeholder="e.g. 3" min="0"></div>
+        <button class="calc-btn" onclick="calcCuboid()">Calculate</button>
+        <div class="calc-result" id="cub-result"></div>
+      </div>
+      <div class="fact-box">
+        <div class="fact-label">💡 Amazing Fact</div>
+        <p>The Great Pyramid of Giza was the tallest man-made structure on Earth for over 3,800 years. Its square base is so precise that the four sides differ by less than 8 cm!</p>
+      </div>
+      <div class="page-nav">
+        <button class="btn btn-secondary" onclick="prevPage()">← Previous</button>
+        <span class="progress-text">Page 7 / 7 — Course Complete! 🎉</span>
+        <a href="assesment.html" class="btn btn-primary">Take the Assessment →</a>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+
+<!-- ============================================================
+     5. ASSESMENT.HTML — Quiz Cards + Score Screen
+     ============================================================ -->
+
+<div class="container">
+  <div id="quiz-screen">
+    <div class="page-header">
+      <div class="page-tag">Knowledge Check</div>
+      <h1>Geometry Assessment</h1>
+      <p>10 questions covering everything you've learned. Answers are <strong>not case sensitive</strong> — just type naturally. Good luck!</p>
+    </div>
+
+    <div class="quiz-progress">
+      <div class="prog-bar"><div class="prog-fill" id="qProgFill" style="width:10%"></div></div>
+      <div class="prog-label" id="qProgLabel">Question 1 / 10</div>
+    </div>
+
+    <!-- Q1 MCQ -->
+    <div class="q-card active" id="qc-0">
+      <div class="q-num">Question 1 of 10 · Multiple Choice</div>
+      <div class="q-text">What is the formula for the area of a rectangle?</div>
+      <div class="options">
+        <div class="opt" onclick="selectOpt(this,0,'A')"><span class="opt-key">A</span> Area = Length + Breadth</div>
+        <div class="opt" onclick="selectOpt(this,0,'B')"><span class="opt-key">B</span> Area = Length × Breadth</div>
+        <div class="opt" onclick="selectOpt(this,0,'C')"><span class="opt-key">C</span> Area = 2 × (Length + Breadth)</div>
+        <div class="opt" onclick="selectOpt(this,0,'D')"><span class="opt-key">D</span> Area = Length²</div>
+      </div>
+      <div class="feedback" id="fb-0"></div>
+      <div class="q-actions"><button class="btn btn-primary" onclick="nextQ(0)">Next →</button></div>
+    </div>
+
+    <!-- Q2 TEXT -->
+    <div class="q-card" id="qc-1">
+      <div class="q-num">Question 2 of 10 · Fill in the Blank</div>
+      <div class="q-text">What is the value of π (pi) to 2 decimal places?</div>
+      <div class="q-hint">Hint: it starts with 3 ...</div>
+      <input class="q-input" id="qi-1" placeholder="Type your answer" />
+      <div class="feedback" id="fb-1"></div>
+      <div class="q-actions"><button class="btn btn-primary" onclick="checkText(1,['3.14'])">Submit →</button></div>
+    </div>
+
+    <!-- Q3 MCQ -->
+    <div class="q-card" id="qc-2">
+      <div class="q-num">Question 3 of 10 · Multiple Choice</div>
+      <div class="q-text">A rectangle has length 8 m and breadth 5 m. What is its area?</div>
+      <div class="options">
+        <div class="opt" onclick="selectOpt(this,2,'A')"><span class="opt-key">A</span> 13 m²</div>
+        <div class="opt" onclick="selectOpt(this,2,'B')"><span class="opt-key">B</span> 26 m²</div>
+        <div class="opt" onclick="selectOpt(this,2,'C')"><span class="opt-key">C</span> 40 m²</div>
+        <div class="opt" onclick="selectOpt(this,2,'D')"><span class="opt-key">D</span> 64 m²</div>
+      </div>
+      <div class="feedback" id="fb-2"></div>
+      <div class="q-actions"><button class="btn btn-primary" onclick="nextQ(2)">Next →</button></div>
+    </div>
+
+    <!-- Q4 TEXT -->
+    <div class="q-card" id="qc-3">
+      <div class="q-num">Question 4 of 10 · Fill in the Blank</div>
+      <div class="q-text">What is the name of the distance from the centre of a circle to its edge?</div>
+      <input class="q-input" id="qi-3" placeholder="Type your answer" />
+      <div class="feedback" id="fb-3"></div>
+      <div class="q-actions"><button class="btn btn-primary" onclick="checkText(3,['radius'])">Submit →</button></div>
+    </div>
+
+    <!-- Q5 MCQ -->
+    <div class="q-card" id="qc-4">
+      <div class="q-num">Question 5 of 10 · Multiple Choice</div>
+      <div class="q-text">The sum of all interior angles of a triangle is:</div>
+      <div class="options">
+        <div class="opt" onclick="selectOpt(this,4,'A')"><span class="opt-key">A</span> 90°</div>
+        <div class="opt" onclick="selectOpt(this,4,'B')"><span class="opt-key">B</span> 180°</div>
+        <div class="opt" onclick="selectOpt(this,4,'C')"><span class="opt-key">C</span> 270°</div>
+        <div class="opt" onclick="selectOpt(this,4,'D')"><span class="opt-key">D</span> 360°</div>
+      </div>
+      <div class="feedback" id="fb-4"></div>
+      <div class="q-actions"><button class="btn btn-primary" onclick="nextQ(4)">Next →</button></div>
+    </div>
+
+    <!-- Q6 TEXT -->
+    <div class="q-card" id="qc-5">
+      <div class="q-num">Question 6 of 10 · Fill in the Blank</div>
+      <div class="q-text">A square has a side of 6 cm. What is its area? (just the number)</div>
+      <div class="q-hint">Hint: side × side</div>
+      <input class="q-input" id="qi-5" placeholder="e.g. 36" type="number" />
+      <div class="feedback" id="fb-5"></div>
+      <div class="q-actions"><button class="btn btn-primary" onclick="checkText(5,['36'])">Submit →</button></div>
+    </div>
+
+    <!-- Q7 MCQ -->
+    <div class="q-card" id="qc-6">
+      <div class="q-num">Question 7 of 10 · Multiple Choice</div>
+      <div class="q-text">Which 3D shape has 6 equal square faces?</div>
+      <div class="options">
+        <div class="opt" onclick="selectOpt(this,6,'A')"><span class="opt-key">A</span> Sphere</div>
+        <div class="opt" onclick="selectOpt(this,6,'B')"><span class="opt-key">B</span> Cylinder</div>
+        <div class="opt" onclick="selectOpt(this,6,'C')"><span class="opt-key">C</span> Cube</div>
+        <div class="opt" onclick="selectOpt(this,6,'D')"><span class="opt-key">D</span> Cone</div>
+      </div>
+      <div class="feedback" id="fb-6"></div>
+      <div class="q-actions"><button class="btn btn-primary" onclick="nextQ(6)">Next →</button></div>
+    </div>
+
+    <!-- Q8 TEXT -->
+    <div class="q-card" id="qc-7">
+      <div class="q-num">Question 8 of 10 · Fill in the Blank</div>
+      <div class="q-text">What is the area formula for a trapezium? Use words: "half times (a plus b) times ___"</div>
+      <div class="q-hint">Hint: the missing word is the vertical measurement</div>
+      <input class="q-input" id="qi-7" placeholder="Type the missing word" />
+      <div class="feedback" id="fb-7"></div>
+      <div class="q-actions"><button class="btn btn-primary" onclick="checkText(7,['height','h'])">Submit →</button></div>
+    </div>
+
+    <!-- Q9 MCQ -->
+    <div class="q-card" id="qc-8">
+      <div class="q-num">Question 9 of 10 · Multiple Choice</div>
+      <div class="q-text">A triangle has a base of 10 cm and a height of 6 cm. What is its area?</div>
+      <div class="options">
+        <div class="opt" onclick="selectOpt(this,8,'A')"><span class="opt-key">A</span> 60 cm²</div>
+        <div class="opt" onclick="selectOpt(this,8,'B')"><span class="opt-key">B</span> 30 cm²</div>
+        <div class="opt" onclick="selectOpt(this,8,'C')"><span class="opt-key">C</span> 16 cm²</div>
+        <div class="opt" onclick="selectOpt(this,8,'D')"><span class="opt-key">D</span> 120 cm²</div>
+      </div>
+      <div class="feedback" id="fb-8"></div>
+      <div class="q-actions"><button class="btn btn-primary" onclick="nextQ(8)">Next →</button></div>
+    </div>
+
+    <!-- Q10 TEXT -->
+    <div class="q-card" id="qc-9">
+      <div class="q-num">Question 10 of 10 · Fill in the Blank</div>
+      <div class="q-text">What is the formula for the circumference of a circle?</div>
+      <div class="q-hint">Hint: it involves 2, π, and r</div>
+      <input class="q-input" id="qi-9" placeholder="e.g. 2 pi r" />
+      <div class="feedback" id="fb-9"></div>
+      <div class="q-actions"><button class="btn btn-primary" onclick="checkText(9,['2 pi r','2pir','2πr','2 × pi × r','2*pi*r'])">Submit →</button></div>
+    </div>
+  </div>
+
+  <!-- SCORE SCREEN -->
+  <div id="score-screen">
+    <div class="score-ring">
+      <div class="score-num" id="finalScore">0</div>
+      <div class="score-denom">/ 10</div>
+    </div>
+    <h2 id="scoreTitle">Well done!</h2>
+    <p id="scoreMsg">Here's how you performed on the geometry quiz.</p>
+    <div class="score-btns">
+      <button class="btn btn-secondary" onclick="retakeQuiz()">Retake Quiz</button>
+      <a href="learn.html" class="btn btn-secondary">Review Lessons</a>
+      <a href="feedback.html" class="btn btn-primary">Leave Feedback</a>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     6. FEEDBACK.HTML — Feedback Form + Contact Block
+     ============================================================ -->
+
+<div class="container">
+  <div class="page-tag">We Value Your Input</div>
+  <h1>Share Your Feedback</h1>
+  <p class="sub">Completed the course? Let us know what you thought — your feedback helps us improve for future learners.</p>
+
+  <div class="form-card">
+    <div id="fb-form">
+      <div class="field">
+        <label>How would you rate this course?</label>
+        <div class="stars" id="starRow">
+          <span class="star" onclick="setStars(1)">★</span>
+          <span class="star" onclick="setStars(2)">★</span>
+          <span class="star" onclick="setStars(3)">★</span>
+          <span class="star" onclick="setStars(4)">★</span>
+          <span class="star" onclick="setStars(5)">★</span>
+        </div>
+      </div>
+      <div class="field">
+        <label for="fb-enjoyed">What did you enjoy most?</label>
+        <select id="fb-enjoyed">
+          <option value="">Select one...</option>
+          <option>The interactive calculators</option>
+          <option>The videos and audio</option>
+          <option>The real-world examples</option>
+          <option>The quiz / assessment</option>
+          <option>The clean design</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="fb-text">Your feedback or suggestions</label>
+        <textarea id="fb-text" rows="5" placeholder="Tell us what you thought, what could be better, or any questions you have..."></textarea>
+      </div>
+      <div class="field">
+        <label for="fb-email">Email (optional — if you'd like a reply)</label>
+        <input type="email" id="fb-email" placeholder="you@example.com" autocomplete="email" />
+      </div>
+      <button class="btn" onclick="submitFb()">Send Feedback →</button>
+    </div>
+
+    <div class="success" id="fb-success">
+      <div class="success-icon">💙</div>
+      <h2>Thank you!</h2>
+      <p>Your feedback has been received. It really does make a difference.</p>
+      <a href="index.html">← Back to Home</a>
+    </div>
+  </div>
+
+  <div class="contact-block">
+    <h2>Contact Us Directly</h2>
+    <div class="contact-item"><span class="contact-icon">✉️</span> support@geolearn.com</div>
+    <div class="contact-item"><span class="contact-icon">📞</span> +91 90000 00000</div>
+    <div class="contact-item"><span class="contact-icon">🕐</span> Mon – Fri, 9 AM – 6 PM IST</div>
+  </div>
+</div>

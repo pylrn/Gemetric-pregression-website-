@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<!-- ============================================================
+     feedback.html  —  GeoLearn Feedback Form
+     ============================================================
+     Purpose:
+       Collects user feedback after completing the course/quiz.
+       Includes a star rating, a free-text comment box, and a
+       dropdown for overall experience.
+
+     Form fields:
+       • Star rating  (1–5 stars, interactive click highlight)
+       • Overall experience  (select: Excellent / Good / Average /
+                              Poor)
+       • Open feedback textarea  (required before submission)
+
+     Key functions (in <script> at bottom):
+       • setStars(n)  — highlights the first n stars and stores the
+                        rating in the starRating variable
+       • submitFb()   — validates that the textarea is not empty,
+                        then hides the form and shows a thank-you
+                        success card
+
+     Scripts:
+       • auth.js (bottom of body) — avatar widget + nav updates.
+     ============================================================ -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GeoLearn – Feedback</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --bg: #0f1117; --card: #21253a; --accent: #4f8ef7; --text: #e8eaf6; --muted: #8b90a8; --radius: 14px; }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', Arial, sans-serif; min-height: 100vh; }
+    nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 40px; height: 64px;
+      background: rgba(15,17,23,0.9); backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      position: sticky; top: 0; z-index: 100;
+    }
+    .nav-logo { font-size: 1.4rem; font-weight: 800; color: var(--accent); text-decoration: none; letter-spacing: 1px; }
+    .nav-links { display: flex; gap: 6px; flex-wrap: wrap; }
+    .nav-links a { color: var(--muted); text-decoration: none; padding: 8px 14px; border-radius: 8px; font-size: 0.93rem; transition: all 0.2s; }
+    .nav-links a:hover, .nav-links a.active { background: var(--card); color: var(--text); }
+    .nav-links a.cta { background: var(--accent); color: #fff; font-weight: 700; }
+
+    .container { max-width: 540px; margin: 0 auto; padding: 60px 24px; }
+    .page-tag { font-size: 0.78rem; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+    h1 { font-size: 2rem; font-weight: 800; margin-bottom: 8px; }
+    .sub { color: var(--muted); margin-bottom: 36px; line-height: 1.65; }
+
+    .form-card { background: var(--card); border-radius: var(--radius); padding: 36px; border: 1px solid rgba(255,255,255,0.07); }
+    .field { margin-bottom: 20px; }
+    label { display: block; font-size: 0.85rem; color: var(--muted); margin-bottom: 8px; }
+    input, textarea, select {
+      width: 100%; background: #0f1117; border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px; color: var(--text); padding: 12px 16px;
+      font-size: 0.97rem; outline: none; transition: border-color 0.2s;
+      font-family: 'Segoe UI', Arial, sans-serif; resize: vertical;
+    }
+    input:focus, textarea:focus, select:focus { border-color: var(--accent); }
+    .stars { display: flex; gap: 8px; margin-bottom: 4px; }
+    .star { font-size: 1.8rem; cursor: pointer; opacity: 0.35; transition: opacity 0.15s; }
+    .star.lit { opacity: 1; }
+    .btn { width: 100%; padding: 14px; border-radius: 10px; background: var(--accent); color: #fff; border: none; font-size: 1rem; font-weight: 700; cursor: pointer; transition: opacity 0.2s; margin-top: 8px; }
+    .btn:hover { opacity: 0.85; }
+
+    .success { display: none; text-align: center; padding: 32px 0; }
+    .success-icon { font-size: 3rem; margin-bottom: 16px; }
+    .success h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 10px; }
+    .success p { color: var(--muted); margin-bottom: 24px; }
+    .success a { color: var(--accent); text-decoration: none; font-weight: 700; }
+
+    .contact-block { margin-top: 40px; background: var(--card); border-radius: var(--radius); padding: 28px; border: 1px solid rgba(255,255,255,0.07); }
+    .contact-block h2 { font-size: 1.05rem; font-weight: 700; margin-bottom: 16px; }
+    .contact-item { display: flex; gap: 12px; align-items: center; margin-bottom: 12px; color: var(--muted); font-size: 0.92rem; }
+    .contact-item:last-child { margin-bottom: 0; }
+    .contact-icon { font-size: 1.2rem; }
+
+    footer { text-align: center; padding: 32px; color: var(--muted); font-size: 0.85rem; border-top: 1px solid rgba(255,255,255,0.06); margin-top: 40px; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="index.html">GeoLearn</a>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="register.html">Register</a>
+    <a href="learn.html">Learn</a>
+    <a href="assesment.html">Assessment</a>
+    <a href="feedback.html" class="active">Feedback</a>
+    <a href="learn.html" class="cta">Learn</a>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="page-tag">We Value Your Input</div>
+  <h1>Share Your Feedback</h1>
+  <p class="sub">Completed the course? Let us know what you thought — your feedback helps us improve for future learners.</p>
+
+  <div class="form-card">
+    <div id="fb-form">
+      <div class="field">
+        <label>How would you rate this course?</label>
+        <div class="stars" id="starRow">
+          <span class="star" onclick="setStars(1)">★</span>
+          <span class="star" onclick="setStars(2)">★</span>
+          <span class="star" onclick="setStars(3)">★</span>
+          <span class="star" onclick="setStars(4)">★</span>
+          <span class="star" onclick="setStars(5)">★</span>
+        </div>
+      </div>
+      <div class="field">
+        <label for="fb-enjoyed">What did you enjoy most?</label>
+        <select id="fb-enjoyed">
+          <option value="">Select one...</option>
+          <option>The interactive calculators</option>
+          <option>The videos and audio</option>
+          <option>The real-world examples</option>
+          <option>The quiz / assessment</option>
+          <option>The clean design</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="fb-text">Your feedback or suggestions</label>
+        <textarea id="fb-text" rows="5" placeholder="Tell us what you thought, what could be better, or any questions you have..."></textarea>
+      </div>
+      <div class="field">
+        <label for="fb-email">Email (optional — if you'd like a reply)</label>
+        <input type="email" id="fb-email" placeholder="you@example.com" autocomplete="email" />
+      </div>
+      <button class="btn" onclick="submitFb()">Send Feedback →</button>
+    </div>
+
+    <div class="success" id="fb-success">
+      <div class="success-icon">💙</div>
+      <h2>Thank you!</h2>
+      <p>Your feedback has been received. It really does make a difference.</p>
+      <a href="index.html">← Back to Home</a>
+    </div>
+  </div>
+
+  <div class="contact-block">
+    <h2>Contact Us Directly</h2>
+    <div class="contact-item"><span class="contact-icon">✉️</span> support@geolearn.com</div>
+    <div class="contact-item"><span class="contact-icon">📞</span> +91 90000 00000</div>
+    <div class="contact-item"><span class="contact-icon">🕐</span> Mon – Fri, 9 AM – 6 PM IST</div>
+  </div>
+</div>
+
+<footer>&copy; 2026 GeoLearn &nbsp;|&nbsp; <a href="index.html" style="color:var(--accent);text-decoration:none">Home</a></footer>
+
+<script>
+  var starRating = 0;
+  function setStars(n) {
+    starRating = n;
+    document.querySelectorAll('.star').forEach(function(s, i){ s.classList.toggle('lit', i < n); });
+  }
+  function submitFb() {
+    var text = document.getElementById('fb-text').value.trim();
+    if (!text) { alert('Please write some feedback before submitting.'); return; }
+    document.getElementById('fb-form').style.display = 'none';
+    document.getElementById('fb-success').style.display = 'block';
+  }
+</script>
+<script src="auth.js"></script>
+</body>
+</html>

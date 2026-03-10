@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<!-- ============================================================
+     learn.html  —  GeoLearn Interactive Lesson Pages
+     ============================================================
+     Purpose:
+       The core learning experience. Displays 7 lesson pages
+       inside a sidebar + content layout, with progress tracking.
+
+     Lessons:
+       0 — Introduction to Geometry
+       1 — Rectangle     (area & perimeter calculator)
+       2 — Circle        (area & circumference calculator)
+       3 — Triangle      (area calculator)
+       4 — Square & Parallelogram (two calculators)
+       5 — Trapezium     (area calculator)
+       6 — 3D Shapes     (cuboid volume calculator)
+
+     Each page contains:
+       • Embedded YouTube video
+       • SVG shape diagram
+       • Formula box
+       • Info/fact cards
+       • Interactive calculator
+       • Browser TTS narration button (speak())
+
+     Key functions (in <script> at bottom):
+       • showPage(n, el) — switches the visible page, highlights
+                           the active sidebar link, updates the
+                           progress bar, and saves page to localStorage
+       • nextPage() / prevPage() — advance or go back one lesson
+       • calcRect/Circle/Tri/Square/Para/Trap/Cuboid() — calculators
+       • speak(text)     — uses the Web Speech API for TTS narration
+
+     Watermark (bottom-left, 18% opacity, pointer-events:none):
+       Shows "Kushan Koul / 24BCE2649" for identification purposes.
+
+     Scripts:
+       • auth.js (bottom of body) — avatar widget + nav updates.
+     ============================================================ -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GeoLearn – Learn</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0f1117; --surface: #1a1d27; --card: #21253a;
+      --accent: #4f8ef7; --text: #e8eaf6; --muted: #8b90a8; --radius: 14px;
+    }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', Arial, sans-serif; min-height: 100vh; }
+    nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 40px; height: 64px;
+      background: rgba(15,17,23,0.9); backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      position: sticky; top: 0; z-index: 100;
+    }
+    .nav-logo { font-size: 1.4rem; font-weight: 800; color: var(--accent); text-decoration: none; letter-spacing: 1px; }
+    .nav-links { display: flex; gap: 6px; flex-wrap: wrap; }
+    .nav-links a { color: var(--muted); text-decoration: none; padding: 8px 14px; border-radius: 8px; font-size: 0.93rem; transition: all 0.2s; }
+    .nav-links a:hover, .nav-links a.active { background: var(--card); color: var(--text); }
+    .nav-links a.cta { background: var(--accent); color: #fff; font-weight: 700; }
+
+    /* LAYOUT */
+    .learn-layout { display: flex; max-width: 1200px; margin: 0 auto; }
+    .sidebar {
+      width: 220px; flex-shrink: 0; padding: 32px 16px;
+      position: sticky; top: 64px; height: calc(100vh - 64px); overflow-y: auto;
+      border-right: 1px solid rgba(255,255,255,0.07);
+    }
+    .sidebar h3 { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+    .sidebar a {
+      display: block; padding: 9px 12px; border-radius: 8px; text-decoration: none;
+      color: var(--muted); font-size: 0.9rem; transition: all 0.2s; margin-bottom: 4px;
+    }
+    .sidebar a:hover, .sidebar a.active { background: var(--card); color: var(--text); }
+    .sidebar .prog-bar { height: 3px; background: rgba(79,142,247,0.15); border-radius: 3px; margin-bottom: 20px; }
+    .sidebar .prog-fill { height: 100%; background: var(--accent); border-radius: 3px; transition: width 0.4s; }
+
+    .content { flex: 1; padding: 40px 48px; min-width: 0; }
+
+    /* PAGE */
+    .page { display: none; }
+    .page.active { display: block; }
+    .page-header { margin-bottom: 36px; }
+    .page-tag { font-size: 0.78rem; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+    .page-header h1 { font-size: 2rem; font-weight: 800; margin-bottom: 12px; }
+    .page-header p { color: var(--muted); line-height: 1.75; max-width: 600px; }
+
+    /* FORMULA BOX */
+    .formula {
+      background: rgba(79,142,247,0.08); border: 1px solid rgba(79,142,247,0.25);
+      border-radius: var(--radius); padding: 20px 24px; margin: 24px 0;
+      font-size: 1.1rem; font-weight: 700; color: var(--accent); text-align: center;
+    }
+
+    /* INFO GRID */
+    .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin: 24px 0; }
+    .info-card { background: var(--card); border-radius: var(--radius); padding: 20px; border: 1px solid rgba(255,255,255,0.07); }
+    .info-card h4 { font-size: 0.82rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+    .info-card p { font-size: 1.05rem; font-weight: 700; color: var(--text); }
+
+    /* SHAPE SVG */
+    .shape-demo { display: flex; justify-content: center; margin: 28px 0; }
+    .shape-demo svg { filter: drop-shadow(0 0 18px rgba(79,142,247,0.35)); }
+
+    /* VIDEO EMBED */
+    .video-wrap {
+      position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;
+      border-radius: var(--radius); margin: 24px 0; border: 1px solid rgba(255,255,255,0.07);
+    }
+    .video-wrap iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
+
+    /* AUDIO */
+    .audio-block { background: var(--card); border-radius: var(--radius); padding: 20px 24px; margin: 24px 0; border: 1px solid rgba(255,255,255,0.07); }
+    .audio-block h4 { font-size: 0.88rem; color: var(--muted); margin-bottom: 12px; }
+    .audio-block audio { width: 100%; accent-color: var(--accent); }
+
+    /* CALC */
+    .calc { background: var(--card); border-radius: var(--radius); padding: 28px; margin: 24px 0; border: 1px solid rgba(255,255,255,0.07); }
+    .calc h3 { font-size: 1rem; font-weight: 700; margin-bottom: 20px; }
+    .calc-row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+    .calc-row label { color: var(--muted); font-size: 0.9rem; min-width: 80px; }
+    .calc-row input {
+      background: var(--bg); border: 1px solid rgba(255,255,255,0.12); border-radius: 8px;
+      color: var(--text); padding: 10px 14px; font-size: 1rem; width: 140px; outline: none;
+      transition: border-color 0.2s;
+    }
+    .calc-row input:focus { border-color: var(--accent); }
+    .calc-btn {
+      background: var(--accent); color: #fff; border: none; border-radius: 8px;
+      padding: 10px 24px; font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: opacity 0.2s;
+    }
+    .calc-btn:hover { opacity: 0.85; }
+    .calc-result { background: rgba(79,142,247,0.1); border-radius: 8px; padding: 14px 18px; margin-top: 14px; font-size: 1.1rem; font-weight: 700; display: none; }
+    .calc-result span { color: var(--accent); }
+
+    /* FUN FACTS */
+    .fact-box { background: var(--card); border-left: 3px solid var(--accent); border-radius: 0 var(--radius) var(--radius) 0; padding: 16px 20px; margin: 20px 0; }
+    .fact-box .fact-label { font-size: 0.78rem; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+    .fact-box p { color: var(--muted); font-size: 0.93rem; line-height: 1.65; }
+
+    /* LIST */
+    .styled-list { list-style: none; margin: 16px 0; }
+    .styled-list li { padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.06); color: var(--muted); font-size: 0.95rem; padding-left: 20px; position: relative; }
+    .styled-list li::before { content: '▸'; color: var(--accent); position: absolute; left: 0; }
+    .styled-list li:last-child { border-bottom: none; }
+
+    /* NAV BTNS */
+    .page-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 48px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.07); }
+    .btn { padding: 12px 28px; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 0.95rem; transition: all 0.2s; border: none; cursor: pointer; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { opacity: 0.85; }
+    .btn-secondary { background: var(--card); color: var(--text); border: 1px solid rgba(255,255,255,0.1); }
+    .btn-secondary:hover { background: #2a2f47; }
+    .btn-ghost { background: transparent; color: var(--muted); font-size: 0.9rem; }
+    .progress-text { font-size: 0.82rem; color: var(--muted); }
+
+    section h2 { font-size: 1.25rem; font-weight: 700; margin: 32px 0 14px; }
+    section p { color: var(--muted); line-height: 1.75; margin-bottom: 14px; }
+
+    footer { text-align: center; padding: 32px; color: var(--muted); font-size: 0.85rem; border-top: 1px solid rgba(255,255,255,0.06); }
+  </style>
+</head>
+<body>
+<div style="position:fixed;bottom:14px;left:18px;z-index:9999;text-align:left;opacity:0.18;pointer-events:none;user-select:none;font-family:'Segoe UI',sans-serif;line-height:1.3;">
+  <div style="font-size:13px;font-weight:700;letter-spacing:0.04em;color:#e8eaf6;">Kushan Koul</div>
+  <div style="font-size:11px;font-weight:500;letter-spacing:0.08em;color:#4f8ef7;">24BCE2649</div>
+</div>
+
+<nav>
+  <a class="nav-logo" href="index.html">GeoLearn</a>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="register.html">Register</a>
+    <a href="learn.html" class="active">Learn</a>
+    <a href="assesment.html">Assessment</a>
+    <a href="feedback.html">Feedback</a>
+    <a href="assesment.html" class="cta">Take Quiz</a>
+  </div>
+</nav>
+
+<div class="learn-layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <h3>Progress</h3>
+    <div class="prog-bar"><div class="prog-fill" id="progFill" style="width:14%"></div></div>
+    <h3>Lessons</h3>
+    <a href="#" class="active" onclick="showPage(0,this)">1 · Introduction</a>
+    <a href="#" onclick="showPage(1,this)">2 · Rectangle</a>
+    <a href="#" onclick="showPage(2,this)">3 · Circle</a>
+    <a href="#" onclick="showPage(3,this)">4 · Triangle</a>
+    <a href="#" onclick="showPage(4,this)">5 · Square & Parallelogram</a>
+    <a href="#" onclick="showPage(5,this)">6 · Trapezium</a>
+    <a href="#" onclick="showPage(6,this)">7 · 3D Shapes</a>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="content">
+
+    <!-- PAGE 0: INTRODUCTION -->
+    <div class="page active" id="page-0">
+      <div class="page-header">
+        <div class="page-tag">Lesson 1 of 7</div>
+        <h1>Introduction to Geometry</h1>
+        <p>Geometry is the branch of mathematics that studies shapes, sizes, and the properties of space. From the floor beneath your feet to the screen you're reading now — geometry is everywhere.</p>
+      </div>
+
+      <div class="video-wrap">
+        <iframe src="https://www.youtube.com/embed/k5etrWdIY6o" title="Math Antics - Points, Lines, & Planes" allowfullscreen></iframe>
+      </div>
+
+      <section>
+        <h2>What is Geometry?</h2>
+        <p>The word <strong style="color:var(--text)">geometry</strong> comes from the Greek words <em>geo</em> (earth) and <em>metron</em> (measurement). Ancient Egyptians used it to resurvey land after Nile floods; Greek mathematicians like Euclid turned it into a formal science.</p>
+        <p>In this course you will explore <strong style="color:var(--text)">2D shapes</strong> — flat figures with length and width — and finish with an introduction to <strong style="color:var(--text)">3D shapes</strong> that also have depth.</p>
+      </section>
+
+      <div class="info-grid">
+        <div class="info-card"><h4>2D Shapes</h4><p>Rectangle, Circle, Triangle, Square, Parallelogram, Trapezium</p></div>
+        <div class="info-card"><h4>Key measures</h4><p>Area, Perimeter, Circumference, Volume</p></div>
+        <div class="info-card"><h4>Real uses</h4><p>Architecture, Art, Engineering, Navigation, Sports</p></div>
+      </div>
+
+      <div class="audio-block">
+        <h4>🔊 Listen: What is Geometry? (narrated overview)</h4>
+        <!-- Browser TTS fallback — no external audio file needed -->
+        <button class="calc-btn" onclick="speak('Geometry is the study of shapes, sizes, and the properties of space. It is one of the oldest branches of mathematics, used by ancient civilisations for land measurement, construction, and astronomy. In this course you will learn about rectangles, circles, triangles, squares, parallelograms, trapeziums, and three-dimensional shapes.')">▶ Play Narration</button>
+      </div>
+
+      <div class="fact-box">
+        <div class="fact-label">💡 Did You Know?</div>
+        <p>Euclid's <em>Elements</em>, written around 300 BC, is one of the most influential textbooks in history — it was used in schools for over 2,000 years!</p>
+      </div>
+
+      <ul class="styled-list">
+        <li>Geometry helps architects design safe buildings</li>
+        <li>GPS navigation relies on geometric calculations</li>
+        <li>Video game graphics are built entirely from geometric shapes</li>
+        <li>Medical imaging (MRI / CT) uses geometry to reconstruct 3D body images</li>
+      </ul>
+
+      <div class="page-nav">
+        <span class="progress-text">Page 1 / 7</span>
+        <button class="btn btn-primary" onclick="nextPage()">Next: Rectangle →</button>
+      </div>
+    </div>
+
+    <!-- PAGE 1: RECTANGLE -->
+    <div class="page" id="page-1">
+      <div class="page-header">
+        <div class="page-tag">Lesson 2 of 7</div>
+        <h1>Rectangle</h1>
+        <p>A rectangle is a four-sided shape with four right angles. Opposite sides are equal and parallel.</p>
+      </div>
+
+      <div class="shape-demo">
+        <svg width="280" height="160" viewBox="0 0 280 160">
+          <rect x="20" y="30" width="240" height="100" rx="4" fill="rgba(79,142,247,0.15)" stroke="#4f8ef7" stroke-width="2.5"/>
+          <text x="140" y="82" fill="#4f8ef7" font-size="14" text-anchor="middle" font-family="Segoe UI">Area = l × b</text>
+          <text x="140" y="20" fill="#8b90a8" font-size="12" text-anchor="middle" font-family="Segoe UI">l (length)</text>
+          <text x="268" y="82" fill="#8b90a8" font-size="12" text-anchor="middle" transform="rotate(90,268,82)" font-family="Segoe UI">b</text>
+        </svg>
+      </div>
+
+      <div class="formula">Area = Length × Breadth &nbsp;|&nbsp; Perimeter = 2 × (l + b)</div>
+
+      <div class="video-wrap">
+        <iframe src="https://www.youtube.com/embed/AAY1bsazcgM" title="Math Antics - Perimeter" allowfullscreen></iframe>
+      </div>
+
+      <section>
+        <h2>Key Properties</h2>
+        <ul class="styled-list">
+          <li>4 right angles (each = 90°)</li>
+          <li>Opposite sides are equal in length</li>
+          <li>Diagonals bisect each other and are equal</li>
+          <li>A square is a special rectangle where all sides are equal</li>
+        </ul>
+        <h2>Real-world Applications</h2>
+        <p>Rectangles are the most common shape in construction. Rooms, doors, windows, screens, and swimming pools are almost always rectangular.</p>
+      </section>
+
+      <div class="info-grid">
+        <div class="info-card"><h4>Example</h4><p>Room: l = 5 m, b = 4 m<br>Area = 20 m²</p></div>
+        <div class="info-card"><h4>Example</h4><p>Football pitch: 105 × 68 m<br>Area = 7,140 m²</p></div>
+      </div>
+
+      <div class="calc">
+        <h3>🧮 Rectangle Calculator</h3>
+        <div class="calc-row"><label>Length</label><input id="rl" type="number" placeholder="e.g. 5" min="0"></div>
+        <div class="calc-row"><label>Breadth</label><input id="rb" type="number" placeholder="e.g. 3" min="0"></div>
+        <button class="calc-btn" onclick="calcRect()">Calculate</button>
+        <div class="calc-result" id="rect-result"></div>
+      </div>
+
+      <div class="fact-box">
+        <div class="fact-label">💡 Fun Fact</div>
+        <p>The A4 paper size (210 × 297 mm) is a rectangle with a special ratio — each time you fold it in half, you get the next "A" size with the same aspect ratio!</p>
+      </div>
+
+      <div class="page-nav">
+        <button class="btn btn-secondary" onclick="prevPage()">← Previous</button>
+        <span class="progress-text">Page 2 / 7</span>
+        <button class="btn btn-primary" onclick="nextPage()">Next: Circle →</button>
+      </div>
+    </div>
+
+    <!-- PAGE 2: CIRCLE -->
+    <div class="page" id="page-2">
+      <div class="page-header">
+        <div class="page-tag">Lesson 3 of 7</div>
+        <h1>Circle</h1>
+        <p>A circle is a perfectly round shape where every point on its boundary is the same distance from the centre, called the <strong style="color:var(--text)">radius</strong>.</p>
+      </div>
+
+      <div class="shape-demo">
+        <svg width="200" height="200" viewBox="0 0 200 200">
+          <circle cx="100" cy="100" r="80" fill="rgba(79,142,247,0.12)" stroke="#4f8ef7" stroke-width="2.5"/>
+          <line x1="100" y1="100" x2="180" y2="100" stroke="#4f8ef7" stroke-width="1.5" stroke-dasharray="5,3"/>
+          <text x="140" y="94" fill="#4f8ef7" font-size="13" text-anchor="middle" font-family="Segoe UI">r</text>
+          <circle cx="100" cy="100" r="4" fill="#4f8ef7"/>
+          <text x="100" y="115" fill="#8b90a8" font-size="12" text-anchor="middle" font-family="Segoe UI">centre</text>
+        </svg>
+      </div>
+
+      <div class="formula">Area = π r² &nbsp;|&nbsp; Circumference = 2π r &nbsp;|&nbsp; π ≈ 3.14159</div>
+
+      <div class="video-wrap">
+        <iframe src="https://www.youtube.com/embed/O-cawByg2aA" title="Math Antics - Circles, Circumference & Area" allowfullscreen></iframe>
+      </div>
+
+      <section>
+        <h2>Key Properties</h2>
+        <ul class="styled-list">
+          <li>Radius (r) — distance from centre to any boundary point</li>
+          <li>Diameter (d = 2r) — straight line through the centre</li>
+          <li>Circumference — the perimeter of a circle</li>
+          <li>π (pi) is a constant ≈ 3.14159, it never ends or repeats</li>
+        </ul>
+      </section>
+
+      <div class="calc">
+        <h3>🧮 Circle Calculator</h3>
+        <div class="calc-row"><label>Radius</label><input id="cr" type="number" placeholder="e.g. 7" min="0"></div>
+        <button class="calc-btn" onclick="calcCircle()">Calculate</button>
+        <div class="calc-result" id="circle-result"></div>
+      </div>
+
+      <div class="fact-box">
+        <div class="fact-label">💡 Fun Fact</div>
+        <p>Tyres, coins, wheels, and planets are all circular because the circle is the most efficient shape — it encloses the maximum area for a given perimeter.</p>
+      </div>
+
+      <div class="audio-block">
+        <h4>🔊 Listen: The Story of Pi</h4>
+        <button class="calc-btn" onclick="speak('Pi, written as the Greek letter π, is a mathematical constant. It is the ratio of a circle\'s circumference to its diameter, approximately 3.14159. Pi is an irrational number, meaning its decimal expansion goes on forever without repeating. Mathematicians have calculated pi to over 100 trillion decimal places!')">▶ Play Narration</button>
+      </div>
+
+      <div class="page-nav">
+        <button class="btn btn-secondary" onclick="prevPage()">← Previous</button>
+        <span class="progress-text">Page 3 / 7</span>
+        <button class="btn btn-primary" onclick="nextPage()">Next: Triangle →</button>
+      </div>
+    </div>
+
+    <!-- PAGE 3: TRIANGLE -->
+    <div class="page" id="page-3">
+      <div class="page-header">
+        <div class="page-tag">Lesson 4 of 7</div>
+        <h1>Triangle</h1>
+        <p>A triangle is a polygon with three sides and three angles. The sum of interior angles always equals 180°.</p>
+      </div>
+
+      <div class="shape-demo">
+        <svg width="240" height="200" viewBox="0 0 240 200">
+          <polygon points="120,20 220,180 20,180" fill="rgba(79,142,247,0.12)" stroke="#4f8ef7" stroke-width="2.5"/>
+          <line x1="120" y1="180" x2="120" y2="20" stroke="#4f8ef7" stroke-width="1.5" stroke-dasharray="5,3"/>
+          <text x="126" y="105" fill="#4f8ef7" font-size="12" font-family="Segoe UI">h</text>
+          <text x="120" y="196" fill="#8b90a8" font-size="12" text-anchor="middle" font-family="Segoe UI">base (b)</text>
+        </svg>
+      </div>
+
+      <div class="formula">Area = ½ × base × height &nbsp;|&nbsp; Perimeter = a + b + c</div>
+
+      <div class="video-wrap">
+        <iframe src="https://www.youtube.com/embed/mLeNaZcy-hE" title="Math Antics - Triangles" allowfullscreen></iframe>
+      </div>
+
+      <section>
+        <h2>Types of Triangle</h2>
+        <div class="info-grid">
+          <div class="info-card"><h4>Equilateral</h4><p>All 3 sides equal · All angles = 60°</p></div>
+          <div class="info-card"><h4>Isosceles</h4><p>2 sides equal · 2 base angles equal</p></div>
+          <div class="info-card"><h4>Scalene</h4><p>All sides different · All angles different</p></div>
+          <div class="info-card"><h4>Right-angled</h4><p>One angle = 90° · Pythagoras applies: a²+b²=c²</p></div>
+        </div>
+      </section>
+
+      <div class="calc">
+        <h3>🧮 Triangle Area Calculator</h3>
+        <div class="calc-row"><label>Base</label><input id="tb" type="number" placeholder="e.g. 6" min="0"></div>
+        <div class="calc-row"><label>Height</label><input id="th" type="number" placeholder="e.g. 4" min="0"></div>
+        <button class="calc-btn" onclick="calcTri()">Calculate</button>
+        <div class="calc-result" id="tri-result"></div>
+      </div>
+
+      <div class="fact-box">
+        <div class="fact-label">💡 Fun Fact</div>
+        <p>Triangles are the strongest shape in engineering — that's why bridges, roof trusses, and the Eiffel Tower are full of triangles.</p>
+      </div>
+
+      <div class="page-nav">
+        <button class="btn btn-secondary" onclick="prevPage()">← Previous</button>
+        <span class="progress-text">Page 4 / 7</span>
+        <button class="btn btn-primary" onclick="nextPage()">Next: Square & Parallelogram →</button>
+      </div>
+    </div>
+
+    <!-- PAGE 4: SQUARE & PARALLELOGRAM -->
+    <div class="page" id="page-4">
+      <div class="page-header">
+        <div class="page-tag">Lesson 5 of 7</div>
+        <h1>Square &amp; Parallelogram</h1>
+        <p>Two closely related four-sided shapes with distinct properties and formulas.</p>
+      </div>
+
+      <section>
+        <h2>Square</h2>
+        <p>A square is a rectangle where all four sides are equal. All angles are 90°.</p>
+        <div class="formula">Area = side² &nbsp;|&nbsp; Perimeter = 4 × side</div>
+
+        <div class="shape-demo">
+          <svg width="160" height="160" viewBox="0 0 160 160">
+            <rect x="20" y="20" width="120" height="120" rx="4" fill="rgba(79,142,247,0.12)" stroke="#4f8ef7" stroke-width="2.5"/>
+            <text x="80" y="115" fill="#8b90a8" font-size="12" text-anchor="middle" font-family="Segoe UI">side (s)</text>
+            <text x="80" y="82" fill="#4f8ef7" font-size="13" text-anchor="middle" font-family="Segoe UI">s²</text>
+          </svg>
+        </div>
+
+        <h2>Parallelogram</h2>
+        <p>A parallelogram has two pairs of parallel sides. Opposite sides are equal; opposite angles are equal. Unlike a rectangle, angles are not necessarily 90°.</p>
+        <div class="formula">Area = base × height &nbsp;|&nbsp; Perimeter = 2 × (a + b)</div>
+      </section>
+
+      <div class="video-wrap">
+        <iframe src="https://www.youtube.com/embed/xCdxURXMdFY" title="Math Antics - Area" allowfullscreen></iframe>
+      </div>
+
+      <div class="calc">
+        <h3>🧮 Square Calculator</h3>
+        <div class="calc-row"><label>Side</label><input id="ss" type="number" placeholder="e.g. 5" min="0"></div>
+        <button class="calc-btn" onclick="calcSquare()">Calculate</button>
+        <div class="calc-result" id="sq-result"></div>
+      </div>
+
+      <div class="calc">
+        <h3>🧮 Parallelogram Calculator</h3>
+        <div class="calc-row"><label>Base</label><input id="pb" type="number" placeholder="e.g. 8" min="0"></div>
+        <div class="calc-row"><label>Height</label><input id="ph" type="number" placeholder="e.g. 5" min="0"></div>
+        <button class="calc-btn" onclick="calcPara()">Calculate</button>
+        <div class="calc-result" id="para-result"></div>
+      </div>
+
+      <div class="fact-box">
+        <div class="fact-label">💡 Did You Know?</div>
+        <p>Every rectangle is a parallelogram, but not every parallelogram is a rectangle. A rhombus is a parallelogram where all sides are equal — like a diamond shape.</p>
+      </div>
+
+      <div class="page-nav">
+        <button class="btn btn-secondary" onclick="prevPage()">← Previous</button>
+        <span class="progress-text">Page 5 / 7</span>
+        <button class="btn btn-primary" onclick="nextPage()">Next: Trapezium →</button>
+      </div>
+    </div>
+
+    <!-- PAGE 5: TRAPEZIUM -->
+    <div class="page" id="page-5">
+      <div class="page-header">
+        <div class="page-tag">Lesson 6 of 7</div>
+        <h1>Trapezium</h1>
+        <p>A trapezium (called a trapezoid in the US) has exactly one pair of parallel sides, called the <strong style="color:var(--text)">bases</strong>.</p>
+      </div>
+
+      <div class="shape-demo">
+        <svg width="280" height="160" viewBox="0 0 280 160">
+          <polygon points="60,20 220,20 260,140 20,140" fill="rgba(79,142,247,0.12)" stroke="#4f8ef7" stroke-width="2.5"/>
+          <text x="140" y="14" fill="#8b90a8" font-size="11" text-anchor="middle" font-family="Segoe UI">a (top base)</text>
+          <text x="140" y="156" fill="#8b90a8" font-size="11" text-anchor="middle" font-family="Segoe UI">b (bottom base)</text>
+          <line x1="140" y1="20" x2="140" y2="140" stroke="#4f8ef7" stroke-width="1.5" stroke-dasharray="5,3"/>
+          <text x="148" y="84" fill="#4f8ef7" font-size="12" font-family="Segoe UI">h</text>
+        </svg>
+      </div>
+
+      <div class="formula">Area = ½ × (a + b) × h</div>
+
+      <div class="video-wrap">
+        <iframe src="https://www.youtube.com/embed/yiREqzDsMP8" title="Math Antics - Quadrilaterals" allowfullscreen></iframe>
+      </div>
+
+      <section>
+        <h2>Properties</h2>
+        <ul class="styled-list">
+          <li>Exactly one pair of parallel sides (the two bases)</li>
+          <li>The two non-parallel sides are called legs</li>
+          <li>An isosceles trapezium has equal legs and equal base angles</li>
+          <li>A right trapezium has two right angles</li>
+        </ul>
+        <h2>Real-world Uses</h2>
+        <p>Trapezium shapes appear in dam cross-sections, handbags, road signs, and architectural facades.</p>
+      </section>
+
+      <div class="calc">
+        <h3>🧮 Trapezium Calculator</h3>
+        <div class="calc-row"><label>Top base (a)</label><input id="ta" type="number" placeholder="e.g. 4" min="0"></div>
+        <div class="calc-row"><label>Bottom base (b)</label><input id="tbb" type="number" placeholder="e.g. 8" min="0"></div>
+        <div class="calc-row"><label>Height (h)</label><input id="tph" type="number" placeholder="e.g. 5" min="0"></div>
+        <button class="calc-btn" onclick="calcTrap()">Calculate</button>
+        <div class="calc-result" id="trap-result"></div>
+      </div>
+
+      <div class="audio-block">
+        <h4>🔊 Listen: Trapezium Explained</h4>
+        <button class="calc-btn" onclick="speak('A trapezium is a four-sided shape with exactly one pair of parallel sides. The parallel sides are called bases and the non-parallel sides are called legs. To find the area, add the two bases together, multiply by the height, then divide by two.')">▶ Play Narration</button>
+      </div>
+
+      <div class="page-nav">
+        <button class="btn btn-secondary" onclick="prevPage()">← Previous</button>
+        <span class="progress-text">Page 6 / 7</span>
+        <button class="btn btn-primary" onclick="nextPage()">Next: 3D Shapes →</button>
+      </div>
+    </div>
+
+    <!-- PAGE 6: 3D SHAPES -->
+    <div class="page" id="page-6">
+      <div class="page-header">
+        <div class="page-tag">Lesson 7 of 7</div>
+        <h1>3D Shapes</h1>
+        <p>Three-dimensional shapes have length, width, and <strong style="color:var(--text)">depth</strong>. They occupy space, which we measure as <em>volume</em>.</p>
+      </div>
+
+      <div class="video-wrap">
+        <iframe src="https://www.youtube.com/embed/qJwecTgce6c" title="Math Antics - Volume" allowfullscreen></iframe>
+      </div>
+
+      <section>
+        <h2>Common 3D Shapes</h2>
+        <div class="info-grid">
+          <div class="info-card"><h4>Cube</h4><p>Volume = s³<br>Surface Area = 6s²<br><em>e.g. dice, Rubik's cube</em></p></div>
+          <div class="info-card"><h4>Cuboid</h4><p>Volume = l × w × h<br>Surface Area = 2(lw + lh + wh)<br><em>e.g. boxes, rooms</em></p></div>
+          <div class="info-card"><h4>Sphere</h4><p>Volume = 4/3 πr³<br>Surface Area = 4πr²<br><em>e.g. ball, planet</em></p></div>
+          <div class="info-card"><h4>Cylinder</h4><p>Volume = πr²h<br>Surface Area = 2πr(r+h)<br><em>e.g. can, pipe</em></p></div>
+          <div class="info-card"><h4>Cone</h4><p>Volume = 1/3 πr²h<br><em>e.g. ice-cream cone, traffic cone</em></p></div>
+          <div class="info-card"><h4>Pyramid</h4><p>Volume = 1/3 × base area × h<br><em>e.g. Great Pyramid of Giza</em></p></div>
+        </div>
+      </section>
+
+      <div class="calc">
+        <h3>🧮 Cuboid Volume Calculator</h3>
+        <div class="calc-row"><label>Length</label><input id="cl" type="number" placeholder="e.g. 5" min="0"></div>
+        <div class="calc-row"><label>Width</label><input id="cw" type="number" placeholder="e.g. 4" min="0"></div>
+        <div class="calc-row"><label>Height</label><input id="ch" type="number" placeholder="e.g. 3" min="0"></div>
+        <button class="calc-btn" onclick="calcCuboid()">Calculate</button>
+        <div class="calc-result" id="cub-result"></div>
+      </div>
+
+      <div class="fact-box">
+        <div class="fact-label">💡 Amazing Fact</div>
+        <p>The Great Pyramid of Giza was the tallest man-made structure on Earth for over 3,800 years. Its square base is so precise that the four sides differ by less than 8 cm!</p>
+      </div>
+
+      <div class="audio-block">
+        <h4>🔊 Listen: 3D Shapes in the Real World</h4>
+        <button class="calc-btn" onclick="speak('Three-dimensional shapes are all around us. Buildings are mostly cuboids. Pipes and cans are cylinders. The earth itself is nearly a sphere. Engineers and architects use 3D geometry every single day to design, build, and calculate the materials needed for their projects.')">▶ Play Narration</button>
+      </div>
+
+      <div class="page-nav">
+        <button class="btn btn-secondary" onclick="prevPage()">← Previous</button>
+        <span class="progress-text">Page 7 / 7 — Course Complete! 🎉</span>
+        <a href="assesment.html" class="btn btn-primary">Take the Assessment →</a>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<footer>&copy; 2026 GeoLearn &nbsp;|&nbsp; <a href="index.html" style="color:var(--accent);text-decoration:none">Home</a> &nbsp;|&nbsp; <a href="assesment.html" style="color:var(--accent);text-decoration:none">Assessment</a></footer>
+
+<script>
+  var current = 0;
+  var total = 7;
+
+  function showPage(n, el) {
+    document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
+    document.querySelectorAll('.sidebar a').forEach(function(a){ a.classList.remove('active'); });
+    document.getElementById('page-' + n).classList.add('active');
+    if (el) el.classList.add('active');
+    current = n;
+    document.getElementById('progFill').style.width = (((n + 1) / total) * 100) + '%';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function nextPage() {
+    if (current < total - 1) {
+      var links = document.querySelectorAll('.sidebar a');
+      showPage(current + 1, links[current + 1]);
+    }
+  }
+
+  function prevPage() {
+    if (current > 0) {
+      var links = document.querySelectorAll('.sidebar a');
+      showPage(current - 1, links[current - 1]);
+    }
+  }
+
+  function showResult(id, html) {
+    var el = document.getElementById(id);
+    el.style.display = 'block';
+    el.innerHTML = html;
+  }
+
+  function calcRect() {
+    var l = parseFloat(document.getElementById('rl').value);
+    var b = parseFloat(document.getElementById('rb').value);
+    if (isNaN(l) || isNaN(b) || l <= 0 || b <= 0) { showResult('rect-result', 'Please enter valid positive numbers.'); return; }
+    showResult('rect-result', 'Area = <span>' + (l * b).toFixed(2) + ' units²</span> &nbsp;|&nbsp; Perimeter = <span>' + (2*(l+b)).toFixed(2) + ' units</span>');
+  }
+
+  function calcCircle() {
+    var r = parseFloat(document.getElementById('cr').value);
+    if (isNaN(r) || r <= 0) { showResult('circle-result', 'Please enter a valid positive radius.'); return; }
+    showResult('circle-result', 'Area = <span>' + (Math.PI * r * r).toFixed(2) + ' units²</span> &nbsp;|&nbsp; Circumference = <span>' + (2 * Math.PI * r).toFixed(2) + ' units</span>');
+  }
+
+  function calcTri() {
+    var b = parseFloat(document.getElementById('tb').value);
+    var h = parseFloat(document.getElementById('th').value);
+    if (isNaN(b) || isNaN(h) || b <= 0 || h <= 0) { showResult('tri-result', 'Please enter valid positive numbers.'); return; }
+    showResult('tri-result', 'Area = <span>' + (0.5 * b * h).toFixed(2) + ' units²</span>');
+  }
+
+  function calcSquare() {
+    var s = parseFloat(document.getElementById('ss').value);
+    if (isNaN(s) || s <= 0) { showResult('sq-result', 'Please enter a valid side length.'); return; }
+    showResult('sq-result', 'Area = <span>' + (s * s).toFixed(2) + ' units²</span> &nbsp;|&nbsp; Perimeter = <span>' + (4 * s).toFixed(2) + ' units</span>');
+  }
+
+  function calcPara() {
+    var b = parseFloat(document.getElementById('pb').value);
+    var h = parseFloat(document.getElementById('ph').value);
+    if (isNaN(b) || isNaN(h) || b <= 0 || h <= 0) { showResult('para-result', 'Please enter valid positive numbers.'); return; }
+    showResult('para-result', 'Area = <span>' + (b * h).toFixed(2) + ' units²</span>');
+  }
+
+  function calcTrap() {
+    var a = parseFloat(document.getElementById('ta').value);
+    var b = parseFloat(document.getElementById('tbb').value);
+    var h = parseFloat(document.getElementById('tph').value);
+    if (isNaN(a) || isNaN(b) || isNaN(h) || a <= 0 || b <= 0 || h <= 0) { showResult('trap-result', 'Please enter valid positive numbers.'); return; }
+    showResult('trap-result', 'Area = <span>' + (0.5 * (a + b) * h).toFixed(2) + ' units²</span>');
+  }
+
+  function calcCuboid() {
+    var l = parseFloat(document.getElementById('cl').value);
+    var w = parseFloat(document.getElementById('cw').value);
+    var h = parseFloat(document.getElementById('ch').value);
+    if (isNaN(l) || isNaN(w) || isNaN(h) || l <= 0 || w <= 0 || h <= 0) { showResult('cub-result', 'Please enter valid positive numbers.'); return; }
+    showResult('cub-result', 'Volume = <span>' + (l * w * h).toFixed(2) + ' units³</span> &nbsp;|&nbsp; Surface Area = <span>' + (2*(l*w + l*h + w*h)).toFixed(2) + ' units²</span>');
+  }
+
+  function speak(text) {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      var utt = new SpeechSynthesisUtterance(text);
+      utt.rate = 0.92;
+      window.speechSynthesis.speak(utt);
+    } else {
+      alert('Sorry, your browser does not support text-to-speech.');
+    }
+  }
+</script>
+<script src="auth.js"></script>
+</body>
+</html>

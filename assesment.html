@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<!-- ============================================================
+     assesment.html  —  GeoLearn Quiz / Assessment
+     ============================================================
+     Purpose:
+       A 10-question geometry quiz that tests knowledge from all
+       7 lessons. Users answer one question at a time and receive
+       a final score with a performance message.
+
+     Question types:
+       • 5 × Multiple-choice (MCQ) — options A / B / C / D
+       • 5 × Numerical input  — user types a calculated answer
+         (tolerance of ±0.1 is applied for rounding differences)
+
+     Question topics:
+       Rectangle area, circle circumference, triangle area,
+       square perimeter, parallelogram area, trapezium area,
+       cuboid volume, sphere formula, 3D shape identification,
+       and Pythagoras.
+
+     Key functions (in <script> at bottom):
+       • selectOpt(el, qIdx, key) — highlights a chosen MCQ option
+       • nextQ(qIdx)        — validates the current answer, marks it
+                              correct/wrong, then advances to the next
+                              question card
+       • goToCard(n)        — shows question card n, updates progress
+                              bar and label
+       • showResults()      — calculates final score, picks a feedback
+                              message and badge colour, reveals the
+                              results card
+       • restartQuiz()      — resets all state and returns to Q1
+
+     Scripts:
+       • auth.js (bottom of body) — avatar widget + nav updates.
+     ============================================================ -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GeoLearn – Assessment</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0f1117; --surface: #1a1d27; --card: #21253a;
+      --accent: #4f8ef7; --text: #e8eaf6; --muted: #8b90a8;
+      --green: #34d399; --red: #f87171; --radius: 14px;
+    }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', Arial, sans-serif; min-height: 100vh; }
+    nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 40px; height: 64px;
+      background: rgba(15,17,23,0.9); backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      position: sticky; top: 0; z-index: 100;
+    }
+    .nav-logo { font-size: 1.4rem; font-weight: 800; color: var(--accent); text-decoration: none; letter-spacing: 1px; }
+    .nav-links { display: flex; gap: 6px; flex-wrap: wrap; }
+    .nav-links a { color: var(--muted); text-decoration: none; padding: 8px 14px; border-radius: 8px; font-size: 0.93rem; transition: all 0.2s; }
+    .nav-links a:hover, .nav-links a.active { background: var(--card); color: var(--text); }
+    .nav-links a.cta { background: var(--accent); color: #fff; font-weight: 700; }
+
+    .container { max-width: 760px; margin: 0 auto; padding: 48px 24px; }
+    .page-header { margin-bottom: 40px; }
+    .page-tag { font-size: 0.78rem; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+    .page-header h1 { font-size: 2rem; font-weight: 800; margin-bottom: 10px; }
+    .page-header p { color: var(--muted); line-height: 1.7; }
+
+    /* PROGRESS */
+    .quiz-progress { display: flex; align-items: center; gap: 16px; margin-bottom: 32px; }
+    .prog-bar { flex: 1; height: 6px; background: rgba(255,255,255,0.08); border-radius: 6px; }
+    .prog-fill { height: 100%; background: var(--accent); border-radius: 6px; transition: width 0.4s; }
+    .prog-label { font-size: 0.82rem; color: var(--muted); white-space: nowrap; }
+
+    /* QUESTION CARD */
+    .q-card { background: var(--card); border-radius: var(--radius); padding: 32px; border: 1px solid rgba(255,255,255,0.07); margin-bottom: 24px; display: none; }
+    .q-card.active { display: block; }
+    .q-num { font-size: 0.78rem; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+    .q-text { font-size: 1.15rem; font-weight: 700; margin-bottom: 20px; line-height: 1.5; }
+    .q-hint { font-size: 0.85rem; color: var(--muted); margin-bottom: 20px; }
+
+    /* MCQ OPTIONS */
+    .options { display: flex; flex-direction: column; gap: 10px; }
+    .opt {
+      background: var(--surface); border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 10px; padding: 14px 18px; cursor: pointer;
+      font-size: 0.95rem; transition: all 0.2s; display: flex; align-items: center; gap: 12px;
+    }
+    .opt:hover { border-color: var(--accent); background: rgba(79,142,247,0.08); }
+    .opt.selected { border-color: var(--accent); background: rgba(79,142,247,0.15); color: var(--text); }
+    .opt.correct { border-color: var(--green); background: rgba(52,211,153,0.12); color: var(--green); }
+    .opt.wrong { border-color: var(--red); background: rgba(248,113,113,0.1); color: var(--red); }
+    .opt-key { width: 28px; height: 28px; border-radius: 6px; background: rgba(255,255,255,0.07); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; flex-shrink: 0; }
+
+    /* TEXT INPUT */
+    .q-input {
+      width: 100%; background: var(--surface); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px; color: var(--text); padding: 14px 18px;
+      font-size: 1rem; outline: none; transition: border-color 0.2s;
+      font-family: 'Segoe UI', Arial, sans-serif;
+    }
+    .q-input:focus { border-color: var(--accent); }
+    .q-input.correct { border-color: var(--green); }
+    .q-input.wrong { border-color: var(--red); }
+
+    .feedback { margin-top: 14px; font-size: 0.9rem; padding: 10px 14px; border-radius: 8px; display: none; }
+    .feedback.correct { background: rgba(52,211,153,0.1); color: var(--green); }
+    .feedback.wrong { background: rgba(248,113,113,0.08); color: var(--red); }
+
+    /* BUTTONS */
+    .btn { padding: 12px 28px; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 0.95rem; transition: all 0.2s; border: none; cursor: pointer; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { opacity: 0.85; }
+    .btn-secondary { background: var(--card); color: var(--text); border: 1px solid rgba(255,255,255,0.1); }
+    .q-actions { display: flex; justify-content: flex-end; margin-top: 24px; }
+
+    /* SCORE SCREEN */
+    #score-screen { display: none; text-align: center; padding: 48px 24px; }
+    .score-ring { width: 140px; height: 140px; border-radius: 50%; border: 6px solid var(--accent); display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto 28px; }
+    .score-num { font-size: 2.6rem; font-weight: 800; color: var(--accent); line-height: 1; }
+    .score-denom { font-size: 1rem; color: var(--muted); }
+    #score-screen h2 { font-size: 1.6rem; font-weight: 800; margin-bottom: 10px; }
+    #score-screen p { color: var(--muted); margin-bottom: 32px; }
+    .score-btns { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+
+    footer { text-align: center; padding: 32px; color: var(--muted); font-size: 0.85rem; border-top: 1px solid rgba(255,255,255,0.06); margin-top: 40px; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="index.html">GeoLearn</a>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="register.html">Register</a>
+    <a href="learn.html">Learn</a>
+    <a href="assesment.html" class="active">Assessment</a>
+    <a href="feedback.html">Feedback</a>
+    <a href="feedback.html" class="cta">Feedback</a>
+  </div>
+</nav>
+
+<div class="container">
+  <div id="quiz-screen">
+    <div class="page-header">
+      <div class="page-tag">Knowledge Check</div>
+      <h1>Geometry Assessment</h1>
+      <p>10 questions covering everything you've learned. Answers are <strong style="color:var(--text)">not case sensitive</strong> — just type naturally. Good luck!</p>
+    </div>
+
+    <div class="quiz-progress">
+      <div class="prog-bar"><div class="prog-fill" id="qProgFill" style="width:10%"></div></div>
+      <div class="prog-label" id="qProgLabel">Question 1 / 10</div>
+    </div>
+
+    <!-- Q1 MCQ -->
+    <div class="q-card active" id="qc-0">
+      <div class="q-num">Question 1 of 10 · Multiple Choice</div>
+      <div class="q-text">What is the formula for the area of a rectangle?</div>
+      <div class="options">
+        <div class="opt" onclick="selectOpt(this,0,'A')"><span class="opt-key">A</span> Area = Length + Breadth</div>
+        <div class="opt" onclick="selectOpt(this,0,'B')"><span class="opt-key">B</span> Area = Length × Breadth</div>
+        <div class="opt" onclick="selectOpt(this,0,'C')"><span class="opt-key">C</span> Area = 2 × (Length + Breadth)</div>
+        <div class="opt" onclick="selectOpt(this,0,'D')"><span class="opt-key">D</span> Area = Length²</div>
+      </div>
+      <div class="feedback" id="fb-0"></div>
+      <div class="q-actions"><button class="btn btn-primary" onclick="nextQ(0)">Next →</button></div>
+    </div>
+
+    <!-- Q2 TEXT -->
+    <div class="q-card" id="qc-1">
+      <div class="q-num">Question 2 of 10 · Fill in the Blank</div>
+      <div class="q-text">What is the value of π (pi) to 2 decimal places?</div>
+      <div class="q-hint">Hint: it starts with 3 ...</div>
+      <input class="q-input" id="qi-1" placeholder="Type your answer" />
+      <div class="feedback" id="fb-1"></div>
+      <div class="q-actions"><button class="btn btn-primary" onclick="checkText(1,['3.14'])">Submit →</button></div>
+    </div>
+
+    <!-- Q3 MCQ -->
+    <div class="q-card" id="qc-2">
+      <div class="q-num">Question 3 of 10 · Multiple Choice</div>
+      <div class="q-text">A rectangle has length 8 m and breadth 5 m. What is its area?</div>
+      <div class="options">
+        <div class="opt" onclick="selectOpt(this,2,'A')"><span class="opt-key">A</span> 13 m²</div>
+        <div class="opt" onclick="selectOpt(this,2,'B')"><span class="opt-key">B</span> 26 m²</div>
+        <div class="opt" onclick="selectOpt(this,2,'C')"><span class="opt-key">C</span> 40 m²</div>
+        <div class="opt" onclick="selectOpt(this,2,'D')"><span class="opt-key">D</span> 64 m²</div>
+      </div>
+      <div class="feedback" id="fb-2"></div>
+      <div class="q-actions"><button class="btn btn-primary" onclick="nextQ(2)">Next →</button></div>
+    </div>
+
+    <!-- Q4 TEXT -->
+    <div class="q-card" id="qc-3">
+      <div class="q-num">Question 4 of 10 · Fill in the Blank</div>
+      <div class="q-text">What is the name of the distance from the centre of a circle to its edge?</div>
+      <input class="q-input" id="qi-3" placeholder="Type your answer" />
+      <div class="feedback" id="fb-3"></div>
+      <div class="q-actions"><button class="btn btn-primary" onclick="checkText(3,['radius'])">Submit →</button></div>
+    </div>
+
+    <!-- Q5 MCQ -->
+    <div class="q-card" id="qc-4">
+      <div class="q-num">Question 5 of 10 · Multiple Choice</div>
+      <div class="q-text">The sum of all interior angles of a triangle is:</div>
+      <div class="options">
+        <div class="opt" onclick="selectOpt(this,4,'A')"><span class="opt-key">A</span> 90°</div>
+        <div class="opt" onclick="selectOpt(this,4,'B')"><span class="opt-key">B</span> 180°</div>
+        <div class="opt" onclick="selectOpt(this,4,'C')"><span class="opt-key">C</span> 270°</div>
+        <div class="opt" onclick="selectOpt(this,4,'D')"><span class="opt-key">D</span> 360°</div>
+      </div>
+      <div class="feedback" id="fb-4"></div>
+      <div class="q-actions"><button class="btn btn-primary" onclick="nextQ(4)">Next →</button></div>
+    </div>
+
+    <!-- Q6 TEXT -->
+    <div class="q-card" id="qc-5">
+      <div class="q-num">Question 6 of 10 · Fill in the Blank</div>
+      <div class="q-text">A square has a side of 6 cm. What is its area? (just the number)</div>
+      <div class="q-hint">Hint: side × side</div>
+      <input class="q-input" id="qi-5" placeholder="e.g. 36" type="number" />
+      <div class="feedback" id="fb-5"></div>
+      <div class="q-actions"><button class="btn btn-primary" onclick="checkText(5,['36'])">Submit →</button></div>
+    </div>
+
+    <!-- Q7 MCQ -->
+    <div class="q-card" id="qc-6">
+      <div class="q-num">Question 7 of 10 · Multiple Choice</div>
+      <div class="q-text">Which 3D shape has 6 equal square faces?</div>
+      <div class="options">
+        <div class="opt" onclick="selectOpt(this,6,'A')"><span class="opt-key">A</span> Sphere</div>
+        <div class="opt" onclick="selectOpt(this,6,'B')"><span class="opt-key">B</span> Cylinder</div>
+        <div class="opt" onclick="selectOpt(this,6,'C')"><span class="opt-key">C</span> Cube</div>
+        <div class="opt" onclick="selectOpt(this,6,'D')"><span class="opt-key">D</span> Cone</div>
+      </div>
+      <div class="feedback" id="fb-6"></div>
+      <div class="q-actions"><button class="btn btn-primary" onclick="nextQ(6)">Next →</button></div>
+    </div>
+
+    <!-- Q8 TEXT -->
+    <div class="q-card" id="qc-7">
+      <div class="q-num">Question 8 of 10 · Fill in the Blank</div>
+      <div class="q-text">What is the area formula for a trapezium? Use words: "half times (a plus b) times ___"</div>
+      <div class="q-hint">Hint: the missing word is the vertical measurement</div>
+      <input class="q-input" id="qi-7" placeholder="Type the missing word" />
+      <div class="feedback" id="fb-7"></div>
+      <div class="q-actions"><button class="btn btn-primary" onclick="checkText(7,['height','h'])">Submit →</button></div>
+    </div>
+
+    <!-- Q9 MCQ -->
+    <div class="q-card" id="qc-8">
+      <div class="q-num">Question 9 of 10 · Multiple Choice</div>
+      <div class="q-text">A triangle has a base of 10 cm and a height of 6 cm. What is its area?</div>
+      <div class="options">
+        <div class="opt" onclick="selectOpt(this,8,'A')"><span class="opt-key">A</span> 60 cm²</div>
+        <div class="opt" onclick="selectOpt(this,8,'B')"><span class="opt-key">B</span> 30 cm²</div>
+        <div class="opt" onclick="selectOpt(this,8,'C')"><span class="opt-key">C</span> 16 cm²</div>
+        <div class="opt" onclick="selectOpt(this,8,'D')"><span class="opt-key">D</span> 120 cm²</div>
+      </div>
+      <div class="feedback" id="fb-8"></div>
+      <div class="q-actions"><button class="btn btn-primary" onclick="nextQ(8)">Next →</button></div>
+    </div>
+
+    <!-- Q10 TEXT -->
+    <div class="q-card" id="qc-9">
+      <div class="q-num">Question 10 of 10 · Fill in the Blank</div>
+      <div class="q-text">What is the formula for the circumference of a circle?</div>
+      <div class="q-hint">Hint: it involves 2, π, and r</div>
+      <input class="q-input" id="qi-9" placeholder="e.g. 2 pi r" />
+      <div class="feedback" id="fb-9"></div>
+      <div class="q-actions"><button class="btn btn-primary" onclick="checkText(9,['2 pi r','2pir','2πr','2 × pi × r','2*pi*r'])">Submit →</button></div>
+    </div>
+  </div>
+
+  <!-- SCORE SCREEN -->
+  <div id="score-screen">
+    <div class="score-ring">
+      <div class="score-num" id="finalScore">0</div>
+      <div class="score-denom">/ 10</div>
+    </div>
+    <h2 id="scoreTitle">Well done!</h2>
+    <p id="scoreMsg">Here's how you performed on the geometry quiz.</p>
+    <div class="score-btns">
+      <button class="btn btn-secondary" onclick="retakeQuiz()">Retake Quiz</button>
+      <a href="learn.html" class="btn btn-secondary">Review Lessons</a>
+      <a href="feedback.html" class="btn btn-primary">Leave Feedback</a>
+    </div>
+  </div>
+</div>
+
+<footer>&copy; 2026 GeoLearn &nbsp;|&nbsp; <a href="index.html" style="color:var(--accent);text-decoration:none">Home</a> &nbsp;|&nbsp; <a href="learn.html" style="color:var(--accent);text-decoration:none">Learn</a></footer>
+
+<script>
+  var score = 0;
+  var answered = new Array(10).fill(false);
+  // correct answers for MCQ (0-indexed question indices that are MCQ)
+  var mcqCorrect = { 0: 'B', 2: 'C', 4: 'B', 6: 'C', 8: 'B' };
+  var mcqSelected = {};
+
+  function selectOpt(el, qIdx, key) {
+    if (answered[qIdx]) return;
+    var card = document.getElementById('qc-' + qIdx);
+    card.querySelectorAll('.opt').forEach(function(o){ o.classList.remove('selected'); });
+    el.classList.add('selected');
+    mcqSelected[qIdx] = key;
+  }
+
+  function nextQ(qIdx) {
+    if (answered[qIdx]) { goToCard(qIdx + 1); return; }
+    var sel = mcqSelected[qIdx];
+    if (!sel) { showFb(qIdx, false, 'Please select an option first.'); return; }
+    var correct = mcqCorrect[qIdx];
+    var card = document.getElementById('qc-' + qIdx);
+    answered[qIdx] = true;
+    card.querySelectorAll('.opt').forEach(function(o) {
+      var k = o.querySelector('.opt-key').textContent.trim();
+      if (k === correct) o.classList.add('correct');
+      else if (k === sel) o.classList.add('wrong');
+    });
+    if (sel === correct) {
+      score++;
+      showFb(qIdx, true, '✓ Correct!');
+    } else {
+      showFb(qIdx, false, '✗ Not quite — the correct answer is ' + correct + '.');
+    }
+    setTimeout(function(){ goToCard(qIdx + 1); }, 900);
+  }
+
+  function checkText(qIdx, validAnswers) {
+    if (answered[qIdx]) { goToCard(qIdx + 1); return; }
+    var inp = document.getElementById('qi-' + qIdx);
+    var val = inp.value.trim().toLowerCase().replace(/\s+/g, ' ');
+    if (!val) { showFb(qIdx, false, 'Please type an answer first.'); return; }
+    var ok = validAnswers.some(function(a){ return val === a.toLowerCase(); });
+    answered[qIdx] = true;
+    inp.classList.add(ok ? 'correct' : 'wrong');
+    if (ok) {
+      score++;
+      showFb(qIdx, true, '✓ Correct!');
+    } else {
+      showFb(qIdx, false, '✗ Not quite — accepted answer: ' + validAnswers[0] + '.');
+    }
+    setTimeout(function(){ goToCard(qIdx + 1); }, 900);
+  }
+
+  function showFb(qIdx, ok, msg) {
+    var fb = document.getElementById('fb-' + qIdx);
+    fb.style.display = 'block';
+    fb.className = 'feedback ' + (ok ? 'correct' : 'wrong');
+    fb.textContent = msg;
+  }
+
+  function goToCard(next) {
+    if (next >= 10) { showScore(); return; }
+    document.querySelectorAll('.q-card').forEach(function(c){ c.classList.remove('active'); });
+    document.getElementById('qc-' + next).classList.add('active');
+    document.getElementById('qProgFill').style.width = ((next + 1) / 10 * 100) + '%';
+    document.getElementById('qProgLabel').textContent = 'Question ' + (next + 1) + ' / 10';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function showScore() {
+    document.getElementById('quiz-screen').style.display = 'none';
+    var ss = document.getElementById('score-screen');
+    ss.style.display = 'block';
+    document.getElementById('finalScore').textContent = score;
+    var pct = score / 10;
+    if (pct >= 0.8) {
+      document.getElementById('scoreTitle').textContent = '🎉 Excellent Work!';
+      document.getElementById('scoreMsg').textContent = 'You scored ' + score + '/10. You have a great understanding of geometry!';
+    } else if (pct >= 0.5) {
+      document.getElementById('scoreTitle').textContent = '👍 Good Effort!';
+      document.getElementById('scoreMsg').textContent = 'You scored ' + score + '/10. Review a few lessons and try again!';
+    } else {
+      document.getElementById('scoreTitle').textContent = '📚 Keep Practising!';
+      document.getElementById('scoreMsg').textContent = 'You scored ' + score + '/10. Head back to the lessons — you\'ve got this!';
+    }
+  }
+
+  function retakeQuiz() {
+    score = 0;
+    answered = new Array(10).fill(false);
+    mcqSelected = {};
+    document.getElementById('score-screen').style.display = 'none';
+    document.getElementById('quiz-screen').style.display = 'block';
+    document.querySelectorAll('.q-card').forEach(function(c){ c.classList.remove('active'); });
+    document.querySelectorAll('.opt').forEach(function(o){ o.className = 'opt'; o.onclick = o.onclick; });
+    document.querySelectorAll('.q-input').forEach(function(i){ i.value = ''; i.className = 'q-input'; });
+    document.querySelectorAll('.feedback').forEach(function(f){ f.style.display = 'none'; });
+    document.getElementById('qc-0').classList.add('active');
+    document.getElementById('qProgFill').style.width = '10%';
+    document.getElementById('qProgLabel').textContent = 'Question 1 / 10';
+  }
+</script>
+<script src="auth.js"></script>
+</body>
+</html>
